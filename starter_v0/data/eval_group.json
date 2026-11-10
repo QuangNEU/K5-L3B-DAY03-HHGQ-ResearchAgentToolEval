@@ -1,7 +1,7 @@
 {
   "dataset_id": "day03_v2_research_group",
   "dataset_role": "group",
-  "description": "Case do nhóm tự viết để kiểm tra năng lực agent: bao gồm kiểm tra tool mới summarize, kiểm tra tham số, hỏi lại khi thiếu thông tin và rào chắn xác nhận.",
+  "description": "Case do nhóm tự viết để kiểm tra năng lực agent: bao gồm kiểm tra tool mới summarize và translate, kiểm tra tham số, hỏi lại khi thiếu thông tin và rào chắn xác nhận.",
   "allowed_failure_types": [
     "wrong_tool",
     "wrong_arg_value",
@@ -12,7 +12,125 @@
   ],
   "cases": [
     {
-      "id": "G03_missing_text_clarify",
+      "id": "G01_translate_default_vi",
+      "phase": "B",
+      "suite": "group",
+      "query": "Dịch giúp mình: The new model outperforms GPT-4 on reasoning tasks.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "The new model outperforms GPT-4 on reasoning tasks."
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "routing_translate_default_target",
+        "difficulty": "easy",
+        "what_it_tests": "Yêu cầu dịch đoạn tiếng Anh, KHÔNG nói ngôn ngữ đích → gọi translate ngay (mặc định tiếng Việt), không clarify, text là nguyên văn không kèm câu lệnh 'Dịch giúp mình'."
+      }
+    },
+    {
+      "id": "G02_translate_multi_language_one_call",
+      "phase": "B",
+      "suite": "group",
+      "query": "Dịch sang tiếng Nhật và tiếng Hàn: Good morning, team.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "Good morning, team.",
+              "target_languages": [
+                "ja",
+                "ko"
+              ]
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "translate_multi_target_args",
+        "difficulty": "medium",
+        "what_it_tests": "Nhiều ngôn ngữ đích → gom vào MỘT lần gọi với target_languages=[ja, ko] (map tên → mã ISO); gọi 2 lần translate sẽ bị tính extra_tool_call."
+      }
+    },
+    {
+      "id": "G03_papers_latest_sort_and_limit",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tìm 3 paper mới nộp gần đây nhất trên arXiv về LLM agents",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "papers",
+            "args": {
+              "max_results": 3,
+              "sort_by": "submittedDate"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "papers_args_sort_limit",
+        "difficulty": "medium",
+        "what_it_tests": "Paper khoa học → papers (không phải lookup); 'mới nộp gần đây nhất' → sort_by=submittedDate; '3 paper' → max_results=3."
+      }
+    },
+    {
+      "id": "G04_word_meaning_no_tool",
+      "phase": "B",
+      "suite": "group",
+      "query": "Từ \"outperform\" nghĩa là gì?",
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "no_tool": true,
+        "behavior": "answer_without_tool"
+      },
+      "metadata": {
+        "skill": "no_tool_word_meaning",
+        "difficulty": "medium",
+        "what_it_tests": "Hỏi nghĩa của MỘT từ → trả lời thẳng, KHÔNG gọi translate hay lookup (theo rule 'KHÔNG DÙNG KHI' của translate)."
+      }
+    },
+    {
+      "id": "G05_parallel_translate_and_papers",
+      "phase": "B",
+      "suite": "group",
+      "query": "Dịch câu \"Good morning, team.\" sang tiếng Hàn, đồng thời tìm giúp mình 3 paper trên arXiv về machine translation.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "Good morning, team.",
+              "target_languages": [
+                "ko"
+              ]
+            }
+          },
+          {
+            "name": "papers",
+            "args": {
+              "max_results": 3
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "parallel_translate_and_papers",
+        "difficulty": "hard",
+        "what_it_tests": "Hai yêu cầu độc lập trong một câu → gọi SONG SONG translate (ko) + papers (max_results=3) trong cùng một lượt; chỉ gọi 1 tool là thiếu."
+      }
+    },
+    {
+      "id": "G06_missing_text_clarify",
       "phase": "B",
       "suite": "group",
       "query": "Tóm tắt giúp mình đoạn văn này với",
@@ -34,7 +152,7 @@
       }
     },
     {
-      "id": "G05_arxiv_search_sort",
+      "id": "G07_arxiv_search_sort",
       "phase": "B",
       "suite": "group",
       "query": "Tìm các nghiên cứu mới nhất về LLM reasoning trên arXiv xếp theo ngày nộp",
@@ -57,7 +175,196 @@
       }
     },
     {
-      "id": "GM01_read_then_summarize",
+      "id": "M01G_clarify_then_translate",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Dịch đoạn này sang tiếng Pháp giúp mình"
+        },
+        {
+          "role": "user",
+          "content": "Đoạn đây: Please review the attached document."
+        },
+        {
+          "role": "user",
+          "content": "Dịch đúng nguyên văn nhé"
+        }
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "Please review the attached document.",
+              "target_languages": [
+                "fr"
+              ]
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_clarify_fill_translate",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: lượt 1 thiếu văn bản, lượt 2 bổ sung văn bản → carry ngôn ngữ đích fr từ lượt 1 + text nguyên văn từ lượt 2."
+      }
+    },
+    {
+      "id": "M02G_correction_target_language",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Dịch sang tiếng Nhật: The meeting is at 3pm."
+        },
+        {
+          "role": "user",
+          "content": "À nhầm, dịch sang tiếng Trung"
+        },
+        {
+          "role": "user",
+          "content": "Vẫn câu đó nhé"
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "The meeting is at 3pm.",
+              "target_languages": [
+                "zh"
+              ]
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_translate_correction",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: user sửa ngôn ngữ đích ja → zh, carry text từ lượt 1; không được giữ ja."
+      }
+    },
+    {
+      "id": "M03G_add_target_language",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Dịch sang tiếng Việt: Thank you for your help."
+        },
+        {
+          "role": "user",
+          "content": "Thêm cả tiếng Thái nữa"
+        },
+        {
+          "role": "user",
+          "content": "Dịch lại cả tiếng Việt và tiếng Thái trong một lần nhé"
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "Thank you for your help.",
+              "target_languages": [
+                "vi",
+                "th"
+              ]
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_translate_accumulate_targets",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: cộng dồn ngôn ngữ đích vi + th vào MỘT lần gọi, carry text từ lượt 1."
+      }
+    },
+    {
+      "id": "M04G_translate_then_send_needs_confirm",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Dịch sang tiếng Việt: Our new product launches next week."
+        },
+        {
+          "role": "user",
+          "content": "Đăng bản dịch đó lên Telegram luôn giúp mình"
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_confirm_before_send_translation",
+        "difficulty": "hard",
+        "what_it_tests": "2 turns: sau khi dịch, user muốn đăng → phải clarify yes_no xin xác nhận, KHÔNG gọi send ngay (translate chỉ dịch, không gửi)."
+      }
+    },
+    {
+      "id": "M05G_parallel_timeline_and_web_news",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tweet mới nhất của Andrej Karpathy là gì?"
+        },
+        {
+          "role": "user",
+          "content": "Tìm thêm tin tức trên web về ông ấy trong tuần này nữa"
+        },
+        {
+          "role": "user",
+          "content": "Lấy cả hai cùng lúc nhé: 3 tweet mới nhất và tin web tuần này"
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "karpathy",
+              "limit": 3
+            }
+          },
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "week"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_parallel_timeline_lookup",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: map Andrej Karpathy → handle karpathy, resolve 'ông ấy' từ lượt 1; gọi SONG SONG timeline (limit=3) + lookup (topic=news, timeframe=week)."
+      }
+    },
+    {
+      "id": "M06G_read_then_summarize",
       "phase": "B",
       "suite": "group",
       "turns": [
@@ -92,7 +399,7 @@
       }
     },
     {
-      "id": "GM03_clarify_then_summarize",
+      "id": "M07G_clarify_then_summarize",
       "phase": "B",
       "suite": "group",
       "turns": [
@@ -125,7 +432,7 @@
       }
     },
     {
-      "id": "GM05_confirm_before_send",
+      "id": "M08G_confirm_before_send",
       "phase": "B",
       "suite": "group",
       "turns": [
