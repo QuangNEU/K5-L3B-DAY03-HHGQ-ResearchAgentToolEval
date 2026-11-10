@@ -83,6 +83,48 @@ tools:
         template: {type: string, enum: [brief, sections, bullets, thread, daily_ai_vn], default: "sections", description: "Khuôn"}
         headline: {type: string, default: "", description: "Tiêu đề"}
       required: [items, template]
+  
+  # ---------------- Team tools ----------------
+  - name: translate
+    description: >-
+      Dịch một đoạn văn bản TIẾNG ANH sang một hoặc nhiều ngôn ngữ khác trong MỘT lần gọi, trả về bản dịch theo từng mã ngôn ngữ.
+      Nếu user KHÔNG nói dịch sang tiếng nào thì mặc định dịch sang tiếng Việt (bỏ trống target_languages hoặc truyền ["vi"]) — KHÔNG hỏi lại.
+      DÙNG KHI: user yêu cầu rõ dịch 1 đoạn văn tiếng Anh đã có sẵn (user dán vào, hoặc là kết quả tool trước đó như bài fetch/tweet/paper) sang ngôn ngữ khác.
+      Nếu user muốn dịch sang nhiều thứ tiếng, gom tất cả vào target_languages của một lần gọi,
+      KHÔNG gọi lặp lại cho từng ngôn ngữ.
+      KHÔNG DÙNG KHI: văn bản nguồn không phải tiếng Anh; user chỉ hỏi nghĩa của một từ
+      (trả lời trực tiếp); chưa có văn bản để dịch (vd "dịch bài này" mà không có nội dung/URL)
+      → gọi clarify để xin văn bản. Nếu văn bản nằm ở một URL, gọi fetch trước rồi mới dịch.
+      Tool chỉ dịch, KHÔNG gửi đi đâu; muốn đăng bản dịch phải qua send và xin xác nhận.
+    parameters:
+      type: object
+      properties:
+        text:
+          type: string
+          default: ""
+          description: >-
+            Nguyên văn đoạn tiếng Anh cần dịch, copy đầy đủ, không tự tóm tắt hay sửa nội dung.
+            Không đưa câu lệnh của user ("dịch giúp mình...") vào đây.
+        target_languages:
+          type: array
+          default: ["vi"]
+          items:
+            type: string
+            enum: [vi, zh, ja, ko, fr, de, es, ru, th, lo, km, id]
+          description: >-
+            Danh sách mã ngôn ngữ đích (ISO 639-1), không trùng lặp, không chứa "en".
+            User không nói tiếng nào → bỏ trống hoặc ["vi"] (mặc định tiếng Việt).
+            Map tên → mã: Việt=vi, Trung=zh, Nhật=ja, Hàn=ko, Pháp=fr, Đức=de,
+            Tây Ban Nha=es, Nga=ru, Thái=th, Lào=lo, Khmer/Campuchia=km, Indonesia=id.
+            Ví dụ "dịch sang tiếng Nhật và tiếng Hàn" → ["ja", "ko"]; "dịch đoạn này" → ["vi"].
+        tone:
+          type: string
+          enum: [neutral, formal, casual]
+          default: "neutral"
+          description: >-
+            Văn phong bản dịch. formal nếu user nói "trang trọng"/"lịch sự"/văn bản công việc;
+            casual nếu user nói "thân mật"/"tự nhiên"/mạng xã hội; còn lại để neutral.
+      required: [text]
 
   # ---------------- Bonus tools ----------------
   - name: send

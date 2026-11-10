@@ -110,13 +110,98 @@ def test_policy_instruction_like_lines_go_to_untrusted_text() -> None:
 #   2. bad / missing input from the model (empty string, wrong type, out-of-enum value)
 #   3. failure path (missing key, HTTP error, timeout) -> returns error dict, does not raise
 
-def test_my_new_tool_happy_path() -> None:
-    pytest.skip(TODO)
+# ---------------- translate (team tool) ----------------
+
+translate_tool = TOOL_FUNCTIONS["translate"]
 
 
-def test_my_new_tool_bad_input_from_model() -> None:
-    pytest.skip(TODO)
+@pytest.fixture
+def no_translate_keys(monkeypatch) -> None:
+    # conftest.clean_env does not know our new env vars, so clear them here.
+    monkeypatch.delenv("MYMEMORY_EMAIL", raising=False)
 
 
-def test_my_new_tool_failure_returns_error_dict() -> None:
-    pytest.skip(TODO)
+def mymemory_ok(text: str) -> FakeResponse:
+    return FakeResponse({"responseData": {"translatedText": text}, "responseStatus": 200})
+
+
+def test_translate_without_target_defaults_to_vietnamese(no_translate_keys, fake_http) -> None:
+    calls = fake_http(mymemory_ok("Xin chào thế giới"))
+
+    result = translate_tool(text="Hello world")
+
+    assert len(calls) == 1
+    assert calls[0]["url"] == "https://api.mymemory.translated.net/get"
+    assert calls[0]["params"] == {"q": "Hello world", "langpair": "en|vi"}
+    assert result["backend"] == "mymemory"
+    assert result["target_languages"] == ["vi"]
+    assert result["translations"] == {"vi": "Xin chào thế giới"}
+
+
+def test_translate_multiple_languages_one_request_each(monkeypatch, no_translate_keys, fake_http) -> None:
+    monkeypatch.setenv("MYMEMORY_EMAIL", "team@example.com")
+    calls = fake_http(mymemory_ok("ok"))
+
+    result = translate_tool(text="Hello", target_languages=["vi", "zh"])
+
+    assert [c["params"]["langpair"] for c in calls] == ["en|vi", "en|zh-CN"]  # zh mapped to zh-CN
+    assert all(c["params"]["de"] == "team@example.com" for c in calls)
+    assert set(result["translations"]) == {"vi", "zh"}  # keys stay ISO codes
+
+
+def test_translate_normalizes_bad_target_languages_from_model(no_translate_keys, fake_http) -> None:
+    calls = fake_http(mymemory_ok("ok"))
+
+    # Model sends duplicates, wrong case, the source language and an unknown code.
+    result = translate_tool(text="Hi", target_languages=["JA", "ja", "en", "xx"])
+
+    assert result["target_languages"] == ["ja"]
+    assert [c["params"]["langpair"] for c in calls] == ["en|ja"]
+
+
+def test_translate_string_target_is_accepted(no_translate_keys, fake_http) -> None:
+    fake_http(mymemory_ok("ok"))
+    result = translate_tool(text="Hi", target_languages="ko")
+    assert result["target_languages"] == ["ko"]
+
+
+def test_translate_empty_text_returns_error_without_request(no_translate_keys, fake_http) -> None:
+    calls = fake_http(mymemory_ok("unused"))
+
+    result = translate_tool(text="   ", target_languages=["vi"])
+
+    assert result["error"] == "ValueError"
+    assert calls == []
+
+
+def test_translate_long_text_is_split_into_chunks(no_translate_keys, fake_http) -> None:
+    calls = fake_http(mymemory_ok("x"))
+    sentence = "This is a fairly long English sentence used for chunking. "
+    text = sentence * 20  # ~1,200 bytes > 450-byte MyMemory limit
+
+    result = translate_tool(text=text)
+
+    assert len(calls) >= 3
+    assert all(len(c["params"]["q"].encode("utf-8")) <= 450 for c in calls)
+    assert "error" not in result
+
+
+def test_translate_http_error_returns_error_dict(no_translate_keys, fake_http) -> None:
+    fake_http(FakeResponse(status_code=503))
+
+    result = translate_tool(text="Hello", target_languages=["vi"])
+
+    assert result["tool"] == "translate"
+    assert result["error"] == "RuntimeError"  # every language failed
+    assert "HTTPError" in result["message"]  # per-language cause is kept
+
+
+def test_translate_mymemory_quota_exceeded_returns_error_dict(no_translate_keys, fake_http) -> None:
+    # MyMemory answers HTTP 200 but puts the real status in the body.
+    fake_http(FakeResponse({"responseData": {"translatedText": ""}, "responseStatus": 429,
+                            "responseDetails": "MYMEMORY WARNING: YOU USED ALL AVAILABLE FREE TRANSLATIONS"}))
+
+    result = translate_tool(text="Hello", target_languages=["vi", "ja"])
+
+    assert result["error"] == "RuntimeError"
+    assert "429" in result["message"]
