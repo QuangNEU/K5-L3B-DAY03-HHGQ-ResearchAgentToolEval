@@ -50,7 +50,7 @@ tools:
       type: object
       properties:
         query: {type: string, default: "", description: "Chủ đề hoặc thực thể cần tìm, ngắn gọn. Không thêm từ chỉ loại nội dung hoặc thời gian như 'tin tức', 'news', 'hôm nay', 'today'; dùng topic và timeframe cho các thông tin đó. Ví dụ: tin AI hôm nay → 'AI'; tin robotics hôm nay → 'robotics'."}
-        topic: {type: string, enum: [general, news], default: "general", description: "Phân loại"}
+        topic: {type: string, enum: [general, news], default: "general", description: "Kiểu tìm kiếm trên web. Chọn news để tìm tin tức về một chủ đề, hoặc general để tra cứu thông tin chung về chủ đề đó."}
         timeframe: {type: string, enum: [day, week, month, year], default: "week", description: "Khoảng thời gian"}
         max_results: {type: integer, default: 5, description: "Số kết quả"}
       required: [query]
