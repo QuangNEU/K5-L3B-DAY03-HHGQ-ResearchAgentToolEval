@@ -30,7 +30,7 @@ tools:
     parameters:
       type: object
       properties:
-        screenname: {type: string, default: "", description: "Tên tài khoản"}
+        screenname: {type: string, default: "", description: "Tên người dùng trên X (Twitter), viết liền và bỏ dấu @ ở đầu. Ví dụ: nếu tài khoản là @abc_xyz thì điền abc_xyz. Nếu chỉ biết họ tên, hãy hỏi lại tên người dùng."}
         limit: {type: integer, default: 5, description: "Số lượng"}
       required: [screenname]
 
