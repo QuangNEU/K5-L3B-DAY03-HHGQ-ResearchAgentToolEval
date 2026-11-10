@@ -105,18 +105,50 @@ def test_policy_instruction_like_lines_go_to_untrusted_text() -> None:
 
 
 # ---------------- YOUR NEW TOOL(S) ----------------
-# Write at least 3 tests per tool your team adds:
-#   1. happy path (mocked if it calls an API)
-#   2. bad / missing input from the model (empty string, wrong type, out-of-enum value)
-#   3. failure path (missing key, HTTP error, timeout) -> returns error dict, does not raise
+# Tool: summarize (Extractive Summarization)
 
-def test_my_new_tool_happy_path() -> None:
-    pytest.skip(TODO)
+def test_summarize_happy_path_extracts_key_points() -> None:
+    summarize_tool = TOOL_FUNCTIONS["summarize"]
+    sample_text = (
+        "Trí tuệ nhân tạo đang phát triển với tốc độ chóng mặt. "
+        "Nhiều mô hình ngôn ngữ lớn đã ra đời phục vụ nghiên cứu và sản xuất. "
+        "Các công cụ agentic AI hỗ trợ lập trình viên tối ưu hóa quy trình làm việc. "
+        "Tuy nhiên việc đánh giá độ tin cậy của tool calling vẫn là bài toán lớn."
+    )
+    result = summarize_tool(text=sample_text, max_sentences=2, focus="general")
+
+    assert result["tool"] == "summarize"
+    assert "summary" in result
+    assert isinstance(result["key_points"], list)
+    assert len(result["key_points"]) <= 2
+    assert result["sentence_count"] <= 2
+    assert result["original_length"] == len(sample_text)
 
 
-def test_my_new_tool_bad_input_from_model() -> None:
-    pytest.skip(TODO)
+def test_summarize_bad_input_from_model_handles_empty_or_whitespace() -> None:
+    summarize_tool = TOOL_FUNCTIONS["summarize"]
+
+    # Chuỗi rỗng hoặc chỉ có khoảng trắng
+    result_empty = summarize_tool(text="   ", max_sentences=3)
+    assert result_empty["tool"] == "summarize"
+    assert result_empty["summary"] == ""
+    assert result_empty["key_points"] == []
+    assert result_empty["sentence_count"] == 0
+
+    # Văn bản chỉ có 1 câu ngắn hơn cả max_sentences
+    short_text = "Hôm nay trời nắng đẹp."
+    result_short = summarize_tool(text=short_text, max_sentences=3)
+    assert result_short["summary"] == short_text
+    assert len(result_short["key_points"]) == 1
 
 
-def test_my_new_tool_failure_returns_error_dict() -> None:
-    pytest.skip(TODO)
+def test_summarize_failure_invalid_max_sentences_returns_error_dict() -> None:
+    summarize_tool = TOOL_FUNCTIONS["summarize"]
+    sample_text = "Đoạn văn bản kiểm thử trường hợp lỗi tham số biên."
+
+    # Model gửi max_sentences = 0 hoặc số âm
+    result = summarize_tool(text=sample_text, max_sentences=0)
+
+    assert "error" in result
+    assert result["error"] == "ValueError"
+    assert "max_sentences must be greater than 0" in result["message"]

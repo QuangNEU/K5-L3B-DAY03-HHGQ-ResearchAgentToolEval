@@ -1,7 +1,163 @@
 {
   "dataset_id": "day03_v2_research_group",
   "dataset_role": "group",
-  "description": "Case do NHÓM tự viết thêm để cover thêm trường hợp. Mỗi case cần: id, phase='B', query HOẶC turns, failure_type (thuộc allowed_failure_types), và expect (tool_calls[...] hoặc no_tool=true). Nên kèm metadata.what_it_tests.",
-  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "description": "Case do nhóm tự viết để kiểm tra năng lực agent: bao gồm kiểm tra tool mới summarize, kiểm tra tham số, hỏi lại khi thiếu thông tin và rào chắn xác nhận.",
+  "allowed_failure_types": [
+    "wrong_tool",
+    "wrong_arg_value",
+    "wrong_boundary",
+    "unnecessary_tool",
+    "out_of_scope",
+    "missing_info"
+  ],
+  "cases": [
+    {
+      "id": "G03_missing_text_clarify",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tóm tắt giúp mình đoạn văn này với",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "clarify_missing_text",
+        "difficulty": "medium",
+        "what_it_tests": "Yêu cầu tóm tắt nhưng không cung cấp nội dung văn bản -> phải gọi clarify xin text, không đoán bừa."
+      }
+    },
+    {
+      "id": "G05_arxiv_search_sort",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tìm các nghiên cứu mới nhất về LLM reasoning trên arXiv xếp theo ngày nộp",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "papers",
+            "args": {
+              "query": "LLM reasoning",
+              "sort_by": "submittedDate"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "arg_arxiv_sort",
+        "difficulty": "medium",
+        "what_it_tests": "Yêu cầu tìm paper trên arXiv xếp theo ngày nộp -> truyền đúng sort_by='submittedDate'."
+      }
+    },
+    {
+      "id": "GM01_read_then_summarize",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Đọc nội dung bài viết này giúp mình: https://example.com/ai-agent-2026"
+        },
+        {
+          "role": "assistant",
+          "content": "Bài viết giới thiệu về sự bùng nổ của AI Agent trong năm 2026. Các mô hình Agentic AI hiện nay có khả năng tự động phối hợp nhiều công cụ để giải quyết các bài toán lập trình phức tạp. Tuy nhiên việc kiểm thử độ an toàn và độ tin cậy của các lệnh gọi công cụ vẫn là một thách thức lớn cần giải quyết."
+        },
+        {
+          "role": "user",
+          "content": "Tóm tắt nội dung bài viết trên thành 2 câu ý chính giúp mình"
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "summarize",
+            "args": {
+              "max_sentences": 2
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_read_then_summarize",
+        "difficulty": "hard",
+        "what_it_tests": "Sau khi đã có ngữ cảnh bài viết từ lượt trước, lượt này yêu cầu tóm tắt thành 2 câu -> route vào tool mới summarize với max_sentences=2."
+      }
+    },
+    {
+      "id": "GM03_clarify_then_summarize",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tóm tắt văn bản này giúp mình"
+        },
+        {
+          "role": "assistant",
+          "content": "Bạn hãy cung cấp nội dung đoạn văn bản cần tóm tắt nhé."
+        },
+        {
+          "role": "user",
+          "content": "Đây là nội dung: Trí tuệ nhân tạo đang thay đổi cách phát triển phần mềm. Các lập trình viên sử dụng AI để hỗ trợ kiểm thử và tự động hóa quy trình triển khai."
+        }
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "summarize",
+            "args": {}
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_clarify_then_summarize",
+        "difficulty": "medium",
+        "what_it_tests": "Lượt đầu thiếu text, lượt sau user cung cấp nội dung -> gọi tool mới summarize."
+      }
+    },
+    {
+      "id": "GM05_confirm_before_send",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Đăng bản tóm tắt nghiên cứu này lên kênh Telegram nhóm nhé"
+        },
+        {
+          "role": "assistant",
+          "content": "Nội dung tóm tắt: 'Nghiên cứu về Agentic AI đã hoàn tất'. Bạn có xác nhận muốn đăng bài này lên kênh Telegram không?"
+        },
+        {
+          "role": "user",
+          "content": "Đồng ý, hãy đăng ngay bây giờ"
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "send",
+            "args": {
+              "confirmed": true
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_confirm_send",
+        "difficulty": "hard",
+        "what_it_tests": "Lượt trước trợ lý xin xác nhận đăng tin, lượt này người dùng đồng ý -> gọi send với confirmed=true."
+      }
+    }
+  ]
 }
