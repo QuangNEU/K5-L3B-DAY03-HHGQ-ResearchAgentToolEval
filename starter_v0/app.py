@@ -34,7 +34,7 @@ if "openai_tools" not in st.session_state:
 # 2. THANH BÊN (SIDEBAR) ĐỂ CẤU HÌNH
 with st.sidebar:
     st.header("⚙️ Cấu hình Agent")
-    provider_choice = st.selectbox("Provider", ["gemini", "openai", "anthropic", "openrouter", "ollama"], index=0)
+    provider_choice = st.selectbox("Provider", ["openrouter","gemini", "openai", "anthropic", "ollama"], index=3)
     model_choice = st.text_input("Model (để trống dùng mặc định)", value="")
     max_rounds = st.slider("Max Tool Rounds", 1, 10, 4)
     history_window = st.slider("History Window", 1, 10, 5)
