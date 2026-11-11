@@ -69,7 +69,7 @@ Lấy từ `starter_v0/artifacts/version_log.csv` và `starter_v0/runs/*.json`. 
 
 ### B2. Failure Analysis
 
-Lấy từ `results[*].result.failures` trong run JSON; giữ các case liên quan đến thay đổi của từng version; R11 và R12 được bổ sung theo đối chiếu với prompt v1.
+Lấy từ `results[*].result.failures` trong run JSON.
 
 | Case ID | Failure Type | Actual Tool Calls | What Failed | Fix |
 |---|---|---|---|---|
