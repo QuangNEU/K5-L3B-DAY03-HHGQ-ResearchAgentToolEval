@@ -73,7 +73,20 @@ Lấy từ `results[*].result.failures` trong run JSON.
 
 | Case ID | Failure Type | Actual Tool Calls | What Failed | Fix |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| R10_missing_handle (v0) | Missing info | `timeline(screenname="sama", limit=5)` | Thiếu handle nhưng đoán `sama`; thiếu `clarify`. | v1 bỏ chỉ dẫn đoán thông tin quan trọng; v1 pass với `clarify(response_type="text")`. |
+| R11_missing_url (v0) | Missing info | `social_search(query="trending article", search_type="Latest", limit=1)` | Thiếu URL, đối tượng mơ hồ nhưng tự đưa ra bài viết; thiếu `clarify`. | v1 bỏ chỉ dẫn đoán URL và yêu cầu hỏi khi đối tượng vẫn mơ hồ; v1 pass với `clarify` hỏi link hoặc nội dung. |
+| R12_confirm_before_send (v0) | Missing tool; extra tool | `format(template="brief", ...)` | Thiếu `clarify` xác nhận trước khi gửi. | v1 yêu cầu xác nhận trước khi gửi; v1 vẫn fail, gọi `send` để hỏi nội dung thay vì `clarify`. |
+| R03_web_news_routing (v1) | Wrong arg value | `lookup(query="AI news today", topic="news", timeframe="day")` | Expected `query="AI"`. | v2 làm rõ `lookup.query`; v2 pass. |
+| R13_parallel_web_and_tweets (v1) | Wrong arg value; missing tool | `lookup(query="AI news today", topic="news", timeframe="day")` | Query sai và thiếu `social_search`. | v2 làm rõ `lookup.query`; v2 pass |
+| M02_carryover_timeframe (v1) | Wrong arg value | `lookup(query="robotics news today", topic="news", timeframe="day")` | Expected `query="robotics"`. | v2 làm rõ query và cách giữ, cập nhật thông tin qua các lượt; v2 pass. |
+| M03_correction_handle (v1) | Wrong arg value | `timeline(screenname="AndrejKarpathy", limit=3)` | Expected `screenname="karpathy"`. | v2 thêm quy tắc ưu tiên giá trị mới nhất; v2 vẫn fail với `screenname="Andrej Karpathy"`. |
+| M05_correction_limit (v1) | Wrong arg value | `timeline(screenname="elonmusk", limit=10)` | Expected `limit=3`. | v2 yêu cầu ưu tiên giá trị mới nhất; v2 vẫn fail với `limit=10`. |
+| M03_correction_handle (v2) | Wrong arg value | `timeline(screenname="Andrej Karpathy", limit=3)` | Tên hiển thị thay vì handle `karpathy`. | v3 làm rõ `timeline.screenname` ưu tiên dùng handle; v3 pass |
+| M05_correction_limit (v2) | Wrong arg value | `timeline(screenname="elonmusk", limit=10)` | Expected `limit=3`. | v3 thêm ví dụ cho trường hợp xử lý multiturn vào system prompt; v3 vẫn fail. v4,v5 pass. |
+| R03_web_news_routing (v3) | Wrong arg value | `lookup(query="AI", timeframe="day")` | Thiếu `topic="news"`. | v4 làm rõ cách chọn `lookup.topic`; v4 pass. |
+| M03_correction_handle (v4) | Missing tool; extra tool | `social_search(query="Andrej Karpathy Twitter", limit=3)` | Model hiểu sai description của 2 tool `timeline` và `social_search`. | v5 làm rõ `timeline` lấy bài đăng của người dùng cụ thể,  `social_search` dùng khi tra cứu thông tin theo từ khóa, làm rõ luôn các description của các tools còn lại để tránh haluciation; v5 pass. |
+
+Nguồn: [version log](../../starter_v0/artifacts/version_log.csv), [run v0](../../starter_v0/runs/v0_B_base_openrouter_20261110T181628834511.json), [v1](../../starter_v0/runs/v1_B_base_openrouter_20261110T192535963510.json), [v2](../../starter_v0/runs/v2_B_base_openrouter_20261110T224459387016.json), [v3](../../starter_v0/runs/v3_B_base_openrouter_20261111T020747209566.json), [v4](../../starter_v0/runs/v4_B_base_openrouter_20261111T023343260878.json), [v5](../../starter_v0/runs/v5_B_base_openrouter_20261111T031733401977.json). Thay đổi đối chiếu theo commit `a376c0b`, `d0d4bee`, `ab8e5e5`, `07dcd61`, `37c9ed9`.
 
 ### B3. Team Eval Cases
 
