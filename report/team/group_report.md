@@ -8,9 +8,9 @@
 
 ## 1. Thông tin nhóm
 
-- Tên nhóm:
+- Tên nhóm: HHGQ
 - Thành viên và phân công: xem [TEAM.md](../../TEAM.md)
-- Provider/model dùng cho v0–v3:
+- Provider/model dùng cho v0–v3: nvidia/nemotron-3.5-lightning:free
 
 ## 2. Mục tiêu và cách tiếp cận — PHẦN A: Giới thiệu agent
 
@@ -62,10 +62,13 @@ Lấy từ `starter_v0/artifacts/version_log.csv` và `starter_v0/runs/*.json`. 
 
 | Version | Changed Artifact | Hypothesis | Metric Before | Metric After | Run File |
 |---|---|---|---:|---:|---|
-| v0 | baseline |  |  |  |  |
-| v1 |  |  |  |  |  |
-| v2 |  |  |  |  |  |
-| v3 |  |  |  |  |  |
+| v0 | baseline | Đo hành vi chưa tối ưu trước khi sửa |  | 0.55 | runs/v0_B_base_openrouter_20261110T181628834511.json |
+| v1 | system_prompt.md | system_prompt hien tai dang khien model tu quyet dinh va ao tuong | 0.55 | 0.65 | runs/v1_B_base_openrouter_20261110T192535963510.json |
+| v2 | system_prompt.md + tools.yaml | Description của tool "lookup" chưa đầy đủ + system prompt thiếu chỉ dẫn lấy dữ lieu trong trường hợp multiturn | 0.65 | 0.8 | runs/v2_B_base_openrouter_20261110T224459387016.json |
+| v3 | system_prompt.md + tools.yaml | Làm rõ định dạng timeline.screenname sẽ giúp model truyền đúng tên tài khoản X. Thêm ví dụ về việc giữ số lượng đã sửa khi lượt cuối chỉ nhắc lại đối tượng sẽ giúp model dùng đúng số lượng. | 0.8 | 0.8 | runs/v3_B_base_openrouter_20261111T020747209566.json |
+| v4 | tools.yaml | Giải thích rõ hai kiểu tìm kiếm news và general sẽ giúp model chọn đúng topic theo nhu cầu tra cứu. | 0.8 | 0.9 | runs/v4_B_base_openrouter_20261111T023343260878.json |
+| v5 | tools.yaml |  Làm rõ description của tool social_search cũng như các tools còn lại để tránh hallucination trong các lần chạy tiếp. | 0.9 | 0.95 | runs/v5_B_base_openrouter_20261111T031733401977.json |
+
 
 ### B2. Failure Analysis
 
