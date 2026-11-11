@@ -18,11 +18,13 @@
 
 > 1–2 câu mô tả agent dùng để làm gì (cho team khác hiểu nhanh).
 
-Ví dụ: "Research agent: tìm tin theo từ khóa / theo tài khoản, đọc URL, tổng hợp thành digest, và gửi lên Telegram khi được xác nhận."
+Research Agent: Hỗ trợ tự động hóa việc tìm kiếm thông tin, trích xuất dữ liệu từ các URL, phân tích và tổng hợp thành kết quả nghiên cứu (digest) thông qua bộ công cụ (tools) tích hợp sẵn.
 
 **Cách chạy UI:**
 
 > Lệnh chạy UI (ví dụ `streamlit run app.py`) và dependency đã thêm vào `starter_v0/requirements.txt`.
+Lệnh chạy: Kích hoạt môi trường (venv) và chạy streamlit run app.py tại thư mục starter_v0.
+Dependency đã thêm vào requirements.txt: streamlit>=1.30.0
 
 **Link dùng thử (deploy):**
 
@@ -169,7 +171,7 @@ Nguồn: `starter_v0/transcripts/v0_openrouter_20261110T182949813877.transcript.
 |---|---|---|---|
 | Tool mới (`tools/<tên>/`) | `tools/translate/`, `tools/summarize/`; khai báo trong `artifacts/tools.yaml`, đăng ký trong `tools/__init__.py` | `translate` gọi API thật dịch đúng sang vi/ja/ko/zh; `summarize` chạy local. Cả hai pass `tests/test_tool_contract.py` (có hàm, tham số khớp chữ ký, có `TOOL.md`) | `translate` không có side effect và chỉ dịch, muốn đăng phải qua `send` + xác nhận. Giới hạn 5.000 ký tự/lần để giữ hạn mức free. Mọi lỗi trả dict lỗi, không raise |
 | Unit test tool mới (≥ 3 test/tool) | `pytest` output (0 failed) | `starter_v0/tests/test_tools_todo.py`: 8 test `translate` + 3 test `summarize`. `pytest`: 83 passed, 0 failed (14 skipped là stub của tool có sẵn) | Test chạy offline: HTTP giả lập bằng `fake_http`, `conftest.py` chặn mạng thật |
-| UI (lệnh chạy + link dùng thử) |  |  |  |
+| UI (lệnh chạy + link dùng thử) | https://dozens-commission-cologne-ricky.trycloudflare.com  |  |  |
 
 Tool unit tests: số test đã viết, và một ví dụ lỗi mà unit test bắt được nhưng eval không bắt được.
 
