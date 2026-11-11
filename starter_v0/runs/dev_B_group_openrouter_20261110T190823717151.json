@@ -1,0 +1,1419 @@
+{
+  "run_id": "dev_B_group_openrouter_20261110T190823717151",
+  "version": "dev",
+  "artifact_version": "dev+peb1c8179815b+te3133f996bbe",
+  "prompt_hash": "eb1c8179815bd79d34de7d326420bb99b3072e6e8ae96464c02d4411f905fc68",
+  "tools_hash": "e3133f996bbe7f4a035e7d1a9576e674291fbe9562621ed5fb497102bd080324",
+  "phase": "B",
+  "suite": "group",
+  "provider": "openrouter",
+  "model": "openai/gpt-4o-mini",
+  "system_prompt": "D:\\programing\\project\\AI thực chiến vin-uni\\K5-L3B-DAY03-HHGQ-ResearchAgentToolEval\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "D:\\programing\\project\\AI thực chiến vin-uni\\K5-L3B-DAY03-HHGQ-ResearchAgentToolEval\\starter_v0\\artifacts\\tools.yaml",
+  "eval_cases": "data\\eval_group.json",
+  "dataset_id": "day03_v2_research_group",
+  "dataset_role": "group",
+  "description": "Case do nhóm tự viết để kiểm tra năng lực agent: bao gồm kiểm tra tool mới summarize và translate, kiểm tra tham số, hỏi lại khi thiếu thông tin và rào chắn xác nhận.",
+  "generated_at": "2026-11-10T19:08:23",
+  "summary": {
+    "total_cases": 15,
+    "measured_cases": 15,
+    "provider_error_cases": 0,
+    "passed_cases": 10,
+    "case_accuracy": 0.6667,
+    "tool_routing_accuracy": 0.8667,
+    "argument_accuracy": 0.6667,
+    "multiturn_accuracy": 0.5,
+    "failure_counts": {
+      "missing_info": 1,
+      "wrong_arg_value": 1,
+      "wrong_boundary": 2,
+      "wrong_tool": 1
+    },
+    "observed_mismatch_counts": {
+      "wrong_arg_value": 3,
+      "extra_tool_call": 1,
+      "missing_tool_call": 1
+    }
+  },
+  "results": [
+    {
+      "id": "G01_translate_default_vi",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "routing_translate_default_target",
+        "difficulty": "easy",
+        "what_it_tests": "Yêu cầu dịch đoạn tiếng Anh, KHÔNG nói ngôn ngữ đích → gọi translate ngay (mặc định tiếng Việt), không clarify, text là nguyên văn không kèm câu lệnh 'Dịch giúp mình'."
+      },
+      "input": "Dịch giúp mình: The new model outperforms GPT-4 on reasoning tasks.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "The new model outperforms GPT-4 on reasoning tasks."
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "The new model outperforms GPT-4 on reasoning tasks.",
+              "target_languages": [
+                "vi"
+              ]
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "translate",
+          "args": {
+            "text": "The new model outperforms GPT-4 on reasoning tasks.",
+            "target_languages": [
+              "vi"
+            ]
+          },
+          "result": {
+            "tool": "translate",
+            "backend": "mymemory",
+            "source_language": "en",
+            "target_languages": [
+              "vi"
+            ],
+            "tone": "neutral",
+            "tone_applied": false,
+            "truncated": false,
+            "translations": {
+              "vi": "Mô hình mới vượt trội hơn GPT-4 trong các nhiệm vụ suy luận."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "G02_translate_multi_language_one_call",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "translate_multi_target_args",
+        "difficulty": "medium",
+        "what_it_tests": "Nhiều ngôn ngữ đích → gom vào MỘT lần gọi với target_languages=[ja, ko] (map tên → mã ISO); gọi 2 lần translate sẽ bị tính extra_tool_call."
+      },
+      "input": "Dịch sang tiếng Nhật và tiếng Hàn: Good morning, team.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "Good morning, team.",
+              "target_languages": [
+                "ja",
+                "ko"
+              ]
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "Good morning, team.",
+              "target_languages": [
+                "ja",
+                "ko"
+              ]
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "translate",
+          "args": {
+            "text": "Good morning, team.",
+            "target_languages": [
+              "ja",
+              "ko"
+            ]
+          },
+          "result": {
+            "tool": "translate",
+            "backend": "mymemory",
+            "source_language": "en",
+            "target_languages": [
+              "ja",
+              "ko"
+            ],
+            "tone": "neutral",
+            "tone_applied": false,
+            "truncated": false,
+            "translations": {
+              "ja": "おはようございます、チーム。",
+              "ko": "안녕하세요, 팀원 여러분."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "G03_papers_latest_sort_and_limit",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "papers_args_sort_limit",
+        "difficulty": "medium",
+        "what_it_tests": "Paper khoa học → papers (không phải lookup); 'mới nộp gần đây nhất' → sort_by=submittedDate; '3 paper' → max_results=3."
+      },
+      "input": "Tìm 3 paper mới nộp gần đây nhất trên arXiv về LLM agents",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "papers",
+            "args": {
+              "max_results": 3,
+              "sort_by": "submittedDate"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "papers",
+            "args": {
+              "query": "LLM agents",
+              "max_results": 3,
+              "sort_by": "submittedDate"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "papers",
+          "args": {
+            "query": "LLM agents",
+            "max_results": 3,
+            "sort_by": "submittedDate"
+          },
+          "result": {
+            "tool": "arxiv_search",
+            "query": "LLM agents",
+            "api_query": "all:LLM AND all:agents",
+            "total_results": 20305,
+            "items": [
+              {
+                "arxiv_id": "2611.12856v1",
+                "title": "WorkflowArena: Benchmarking Executable Workflow Orchestration in LLM-Based Multi-Agent Systems",
+                "summary": "Large language model agents are increasingly deployed as multi-agent systems rather than as a standalone model operating within a single context. Recent agent harnesses allow the model to instantiate worker agents and to author the executable workflow that coordinates them, shifting the design of system structure from developers to the model at run time. The quality of this organization therefore constitutes a distinct capability, yet existing benchmarks either measure end-to-end task completion or evaluate coordination under structures specified in advance. We formalize this capability as workflow orchestration and introduce WorkflowArena, a benchmark of 145 long-horizon tasks spanning 8 professional domains, from software engineering and formal mathematics to legal analysis and 3D production. Each task specifies an initial workspace and an integrated deliverable composed of interdependent components, which is assessed by a hidden verifier. Agents determine autonomously whether and how to delegate, and all delegation is recorded, enabling joint evaluation of deliverable quality and the organization of the underlying work. Experiments with nine models show that no single configuration performs best across all domains and that systems exhibit distinct delegation strategies: at high effort, Claude models in Claude Code invoke workflows less frequently but with larger worker groups, whereas GPT models in Codex delegate more frequently in smaller units. When the executing model is held fixed on a challenging subset of tasks, workflows authored by Claude Opus 5.5 substantially improve weaker executors, indicating that workflow organization is itself a measurable determinant of task performance.",
+                "authors": [
+                  "Zheng Jiang",
+                  "Fang Niu",
+                  "Bo Peng",
+                  "Houde Qian",
+                  "Wenyi Li",
+                  "Deyao Hong",
+                  "Mingju Gao",
+                  "Yizhe Chi",
+                  "Youjie Zheng",
+                  "Kaisen Yang",
+                  "Calvin Xiao",
+                  "Lifeng Sun",
+                  "Huan-ang Gao"
+                ],
+                "published": "2026-11-09T18:45:28Z",
+                "updated": "2026-11-09T18:45:28Z",
+                "url": "http://arxiv.org/abs/2611.12856v1",
+                "pdf_url": "https://arxiv.org/pdf/2611.12856v1",
+                "source": "arxiv.org",
+                "primary_category": "cs.CL",
+                "categories": [
+                  "cs.CL",
+                  "cs.SE"
+                ]
+              },
+              {
+                "arxiv_id": "2611.12799v1",
+                "title": "Agentic-OPD: Recovering Forgotten Agent Capabilities via On-Policy Distillation for Agentic Tasks",
+                "summary": "Reinforcement learning is now the mainstream paradigm for training LLMs on agentic tasks, yet standard practice keeps only the best-validation checkpoint and discards the rest. We show that this is lossy: in GRPO training of LLM agents, the best-validation checkpoint fails on problems that earlier checkpoints from the same run had already solved, and the union of problems solved across checkpoints far exceeds any single one. The discarded checkpoints thus form a teacher pool obtained at no additional training cost, which on-policy distillation (OPD) can mine to recover the lost coverage. Mining this pool raises two challenges: i) which checkpoint to distill from, as no checkpoint dominates the others and complementarity to the student is problem-specific; ii) where to trust it, as even a well-chosen teacher is only locally superior, so indiscriminate distillation overwrites behavior the student has already mastered. We propose Agentic-OPD, which treats the best-validation checkpoint as the student and all saved checkpoints as frozen teacher candidates, using the student's evolving capability gaps to guide both teacher selection and supervision filtering: the HCN policy (Highest Coverage Next) dynamically selects teachers by weighted coverage of the student's unsolved problems, while the LAD module (Locality-Aware Distillation) confines transfer to failed student rollouts on problems where the teacher performs better. Across five agentic task domains and 24 benchmarks and task subsets, Agentic-OPD improves over its initialization checkpoint by up to 7.4 points, with a 4B student surpassing the latest frontier models GPT-5.6 and DeepSeek-V4.1 on deep search. Agentic-OPD recasts a finished RL run as a reusable pool of policies and establishes post-RL capability recovery as a stage orthogonal to improvements in the RL algorithm itself.",
+                "authors": [
+                  "Tingcheng Bian",
+                  "Kangye Gong",
+                  "Jinchang Luo",
+                  "MingQuan Cheng",
+                  "Feiran Liu",
+                  "Ni Li",
+                  "Xiaoling Xia",
+                  "Haiwei Wang",
+                  "Hui Li"
+                ],
+                "published": "2026-11-09T18:07:42Z",
+                "updated": "2026-11-09T18:07:42Z",
+                "url": "http://arxiv.org/abs/2611.12799v1",
+                "pdf_url": "https://arxiv.org/pdf/2611.12799v1",
+                "source": "arxiv.org",
+                "primary_category": "cs.LG",
+                "categories": [
+                  "cs.LG",
+                  "cs.AI"
+                ]
+              },
+              {
+                "arxiv_id": "2611.12545v1",
+                "title": "Teamknitt: Configuring, Observing and Intervening in LLM-Agent Teams through the Lens of Dynamical-Systems and Human-Team Theory",
+                "summary": "Most frameworks for teams of large language model (LLM) agents fix the team's shape inside the software: who talks to whom, how much is passed along, and what a human can do once a run has started. Human-team research has long asked those questions: where team phenomena live (in members or in their interaction), how team-level properties arise, and what separates what a team does from how a team is. I propose using that theory as the organizing lens for configuring, observing and intervening in LLM-agent teams, without assuming its findings transfer. I introduce teamknitt, a framework and open reference implementation in which a user configures a team of 1-16 AI agents for task completion, solution generation, achieving a goal or a research mission; selects one of fourteen deterministic routing topologies or a custom directed graph; chooses a sharing profile that limits what may travel along permitted routes; and binds sources, representations, work dependencies, handoffs and an expertise directory. The recorded process can be observed through non-system views (member reports and behavior) and system views (distributed problem-solving, differentiated transactive memory, interactive coordination, team dynamics). Interventions are explicit and human-led: reviewed reconfiguration between runs, planned disturbances, and private feedback, pause, resume or stop applied at dependency-wave boundaries, with \"queued\", \"applied\", \"assembled\", \"understood\" and \"improved\" kept as separate claims. Emergent states such as trust and shared understanding are declared unmeasured. This is an idea and system-description paper with falsifiable hypotheses on topology, information flow and intervention timing, including whether the fractal scaling of communication output between members, and between members on different models, relates to task and team performance. No comparative result is reported.",
+                "authors": [
+                  "Goran Mitevski"
+                ],
+                "published": "2026-11-09T15:15:39Z",
+                "updated": "2026-11-09T15:15:39Z",
+                "url": "http://arxiv.org/abs/2611.12545v1",
+                "pdf_url": "https://arxiv.org/pdf/2611.12545v1",
+                "source": "arxiv.org",
+                "primary_category": "physics.soc-ph",
+                "categories": [
+                  "physics.soc-ph",
+                  "cs.MA"
+                ]
+              }
+            ],
+            "rate_limit_note": "arXiv may return 429 if called too frequently; this tool waits at least 3 seconds between requests in-process."
+          }
+        }
+      ]
+    },
+    {
+      "id": "G04_word_meaning_no_tool",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "no_tool_word_meaning",
+        "difficulty": "medium",
+        "what_it_tests": "Hỏi nghĩa của MỘT từ → trả lời thẳng, KHÔNG gọi translate hay lookup (theo rule 'KHÔNG DÙNG KHI' của translate)."
+      },
+      "input": "Từ \"outperform\" nghĩa là gì?",
+      "expect": {
+        "no_tool": true,
+        "behavior": "answer_without_tool"
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [],
+        "actual_text": "Từ \"outperform\" có nghĩa là vượt trội hơn, thể hiện hiệu suất tốt hơn so với một cái gì đó khác, thường được sử dụng trong ngữ cảnh tài chính hoặc kinh doanh để chỉ việc một công ty, sản phẩm hoặc dịch vụ hoạt động tốt hơn so với đối thủ hoặc tiêu chuẩn.",
+        "case_failure_type": "unnecessary_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G05_parallel_translate_and_papers",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "parallel_translate_and_papers",
+        "difficulty": "hard",
+        "what_it_tests": "Hai yêu cầu độc lập trong một câu → gọi SONG SONG translate (ko) + papers (max_results=3) trong cùng một lượt; chỉ gọi 1 tool là thiếu."
+      },
+      "input": "Dịch câu \"Good morning, team.\" sang tiếng Hàn, đồng thời tìm giúp mình 3 paper trên arXiv về machine translation.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "Good morning, team.",
+              "target_languages": [
+                "ko"
+              ]
+            }
+          },
+          {
+            "name": "papers",
+            "args": {
+              "max_results": 3
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "Good morning, team.",
+              "target_languages": [
+                "ko"
+              ]
+            }
+          },
+          {
+            "name": "papers",
+            "args": {
+              "query": "machine translation",
+              "max_results": 3
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "translate",
+          "args": {
+            "text": "Good morning, team.",
+            "target_languages": [
+              "ko"
+            ]
+          },
+          "result": {
+            "tool": "translate",
+            "backend": "mymemory",
+            "source_language": "en",
+            "target_languages": [
+              "ko"
+            ],
+            "tone": "neutral",
+            "tone_applied": false,
+            "truncated": false,
+            "translations": {
+              "ko": "안녕하세요, 팀원 여러분."
+            }
+          }
+        },
+        {
+          "tool": "papers",
+          "args": {
+            "query": "machine translation",
+            "max_results": 3
+          },
+          "result": {
+            "tool": "arxiv_search",
+            "query": "machine translation",
+            "api_query": "all:machine AND all:translation",
+            "total_results": 13453,
+            "items": [
+              {
+                "arxiv_id": "1702.01806v2",
+                "title": "Beam Search Strategies for Neural Machine Translation",
+                "summary": "The basic concept in Neural Machine Translation (NMT) is to train a large Neural Network that maximizes the translation performance on a given parallel corpus. NMT is then using a simple left-to-right beam-search decoder to generate new translations that approximately maximize the trained conditional probability. The current beam search strategy generates the target sentence word by word from left-to- right while keeping a fixed amount of active candidates at each time step. First, this simple search is less adaptive as it also expands candidates whose scores are much worse than the current best. Secondly, it does not expand hypotheses if they are not within the best scoring candidates, even if their scores are close to the best one. The latter one can be avoided by increasing the beam size until no performance improvement can be observed. While you can reach better performance, this has the draw- back of a slower decoding speed. In this paper, we concentrate on speeding up the decoder by applying a more flexible beam search strategy whose candidate size may vary at each time step depending on the candidate scores. We speed up the original decoder by up to 43% for the two language pairs German-English and Chinese-English without losing any translation quality.",
+                "authors": [
+                  "Markus Freitag",
+                  "Yaser Al-Onaizan"
+                ],
+                "published": "2017-02-06T22:08:46Z",
+                "updated": "2017-06-14T01:00:18Z",
+                "url": "http://arxiv.org/abs/1702.01806v2",
+                "pdf_url": "https://arxiv.org/pdf/1702.01806v2",
+                "source": "arxiv.org",
+                "primary_category": "cs.CL",
+                "categories": [
+                  "cs.CL"
+                ]
+              },
+              {
+                "arxiv_id": "1409.7085v1",
+                "title": "Semantically-Informed Syntactic Machine Translation: A Tree-Grafting Approach",
+                "summary": "We describe a unified and coherent syntactic framework for supporting a semantically-informed syntactic approach to statistical machine translation. Semantically enriched syntactic tags assigned to the target-language training texts improved translation quality. The resulting system significantly outperformed a linguistically naive baseline model (Hiero), and reached the highest scores yet reported on the NIST 2009 Urdu-English translation task. This finding supports the hypothesis (posed by many researchers in the MT community, e.g., in DARPA GALE) that both syntactic and semantic information are critical for improving translation quality---and further demonstrates that large gains can be achieved for low-resource languages with different word order than English.",
+                "authors": [
+                  "Kathryn Baker",
+                  "Michael Bloodgood",
+                  "Chris Callison-Burch",
+                  "Bonnie J. Dorr",
+                  "Nathaniel W. Filardo",
+                  "Lori Levin",
+                  "Scott Miller",
+                  "Christine Piatko"
+                ],
+                "published": "2014-09-24T20:16:49Z",
+                "updated": "2014-09-24T20:16:49Z",
+                "url": "http://arxiv.org/abs/1409.7085v1",
+                "pdf_url": "https://arxiv.org/pdf/1409.7085v1",
+                "source": "arxiv.org",
+                "primary_category": "cs.CL",
+                "categories": [
+                  "cs.CL",
+                  "cs.LG",
+                  "stat.ML"
+                ]
+              },
+              {
+                "arxiv_id": "1809.00357v1",
+                "title": "Trivial Transfer Learning for Low-Resource Neural Machine Translation",
+                "summary": "Transfer learning has been proven as an effective technique for neural machine translation under low-resource conditions. Existing methods require a common target language, language relatedness, or specific training tricks and regimes. We present a simple transfer learning method, where we first train a \"parent\" model for a high-resource language pair and then continue the training on a lowresource pair only by replacing the training corpus. This \"child\" model performs significantly better than the baseline trained for lowresource pair only. We are the first to show this for targeting different languages, and we observe the improvements even for unrelated languages with different alphabets.",
+                "authors": [
+                  "Tom Kocmi",
+                  "Ondřej Bojar"
+                ],
+                "published": "2018-09-02T15:24:15Z",
+                "updated": "2018-09-02T15:24:15Z",
+                "url": "http://arxiv.org/abs/1809.00357v1",
+                "pdf_url": "https://arxiv.org/pdf/1809.00357v1",
+                "source": "arxiv.org",
+                "primary_category": "cs.CL",
+                "categories": [
+                  "cs.CL"
+                ]
+              }
+            ],
+            "rate_limit_note": "arXiv may return 429 if called too frequently; this tool waits at least 3 seconds between requests in-process."
+          }
+        }
+      ]
+    },
+    {
+      "id": "G06_missing_text_clarify",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "clarify_missing_text",
+        "difficulty": "medium",
+        "what_it_tests": "Yêu cầu tóm tắt nhưng không cung cấp nội dung văn bản -> phải gọi clarify xin text, không đoán bừa."
+      },
+      "input": "Tóm tắt giúp mình đoạn văn này với",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": true,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "question": "Vui lòng cung cấp đoạn văn cần tóm tắt."
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": "wrong_arg_value",
+        "failure_type": "missing_info",
+        "failures": [
+          "response_type: expected 'text', got None"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Vui lòng cung cấp đoạn văn cần tóm tắt."
+          },
+          "result": {
+            "tool": "ask_user",
+            "question": "Vui lòng cung cấp đoạn văn cần tóm tắt.",
+            "response_type": "text",
+            "options": [],
+            "awaiting_user": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "G07_arxiv_search_sort",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "arg_arxiv_sort",
+        "difficulty": "medium",
+        "what_it_tests": "Yêu cầu tìm paper trên arXiv xếp theo ngày nộp -> truyền đúng sort_by='submittedDate'."
+      },
+      "input": "Tìm các nghiên cứu mới nhất về LLM reasoning trên arXiv xếp theo ngày nộp",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "papers",
+            "args": {
+              "query": "LLM reasoning",
+              "sort_by": "submittedDate"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "papers",
+            "args": {
+              "query": "LLM reasoning",
+              "max_results": 5,
+              "sort_by": "submittedDate"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "papers",
+          "args": {
+            "query": "LLM reasoning",
+            "max_results": 5,
+            "sort_by": "submittedDate"
+          },
+          "result": {
+            "tool": "arxiv_search",
+            "query": "LLM reasoning",
+            "api_query": "all:LLM AND all:reasoning",
+            "total_results": 24285,
+            "items": [
+              {
+                "arxiv_id": "2611.12791v1",
+                "title": "Large Language Models as a Universal Searcher for Open-World Automated Machine Learning",
+                "summary": "Developing effective machine learning models requires complex manual tuning, while current Automated Machine Learning (AutoML) frameworks remain domain-specific and isolate model architecture, training hyperparameter, and data ratio optimization. Here, we bridge this gap by proposing a universal, large language model (LLM)-based AutoML framework that jointly optimizes these configurations for the first time without the need for task-specific fine-tuning. We propose NCode, a unified numerical encoding scheme that translates diverse AutoML design choices into universal discrete sequences and effectively reframes the optimization process as a unified ranking task. Trained solely on optimization trajectories derived from a limited, single-domain vision task, the proposed LLM-based searcher demonstrates impressive cross-task, cross-modality and joint search-space optimization generalizability, achieving state-of-the-art performance across image classification, image segmentation, speaker verification and text-to-image benchmarks. Crucially, it exhibits superior scalability in the large-scale training and joint optimization of a billion-parameter Diffusion Transformer, requiring 896 GPU-days and attaining a state-of-the-art GenEval score of 0.91. By leveraging reinforcement learning to instill Chain-of-Thought reasoning, we provide a systematic way to interpret the LLM-based searcher's internal decision-making mechanisms, revealing its optimization strategy shifted from the early-stage diversity-driven exploration to the late-stage anchor exploitation. Our proposed framework provides a scalable, generalizable, and interpretable pathway toward general-purpose open-world machine learning optimization.",
+                "authors": [
+                  "Yuxuan Hu",
+                  "Jihao Liu",
+                  "Weikang Shi",
+                  "Xijie Huang",
+                  "Linda Wei",
+                  "Mingjie Zhan",
+                  "Aojun Zhou",
+                  "Rui Liu",
+                  "Hongsheng Li"
+                ],
+                "published": "2026-11-09T17:58:38Z",
+                "updated": "2026-11-09T17:58:38Z",
+                "url": "http://arxiv.org/abs/2611.12791v1",
+                "pdf_url": "https://arxiv.org/pdf/2611.12791v1",
+                "source": "arxiv.org",
+                "primary_category": "cs.CL",
+                "categories": [
+                  "cs.CL"
+                ]
+              },
+              {
+                "arxiv_id": "2611.12640v1",
+                "title": "TrialDesignBench: Benchmarking Language Models for Phase-I Trial Design Against Clinical Knowledge",
+                "summary": "AI is used in much of the clinical trial pipeline. However, selecting the statistical design of a trial, a crucial step that determines how drug doses are tested on humans and evaluated, has seen almost no AI progress. LLMs appear to be a natural fit given their strengths in biomedical knowledge and statistical reasoning. Nevertheless, there is currently no appropriate way to evaluate such abilities because recent regulatory and methodological shifts, most notably FDA's Project Optimus, have redefined what constitutes a reasonable design and rendered many previous designs obsolete. To lay the groundwork for AI-assisted trial design, we introduce TrialDesignBench, a benchmark of 617 Phase-I/I-II oncology dose-finding trials, each paired with an expert-validated reference design that is consistent with the latest FDA regulatory initiatives. This reference standard is produced through a formalization of the expert design process. We evaluate five frontier LLMs, none of which matches the reference standard. Our ablation experiments trace this performance gap to two main causes, inference of latent, unrecorded design determinants from trial sources (supplying them raises class-wise balanced accuracy by 0.22) and structured decision-tree reasoning (+0.24). TrialDesignBench offers a reproducible, contemporary-standard objective for evaluating and enhancing AI-assisted trial design.",
+                "authors": [
+                  "Yihan Hank Tang",
+                  "Peng Yang",
+                  "Jiayi Xin",
+                  "Tianqi Shang",
+                  "Xuyang Chen",
+                  "Ying Yuan",
+                  "Yi Lian",
+                  "Qi Long"
+                ],
+                "published": "2026-11-09T16:15:57Z",
+                "updated": "2026-11-09T16:15:57Z",
+                "url": "http://arxiv.org/abs/2611.12640v1",
+                "pdf_url": "https://arxiv.org/pdf/2611.12640v1",
+                "source": "arxiv.org",
+                "primary_category": "cs.AI",
+                "categories": [
+                  "cs.AI",
+                  "cs.CL",
+                  "stat.AP"
+                ]
+              },
+              {
+                "arxiv_id": "2611.12635v1",
+                "title": "Beyond Sunny Skies: Using Large Language Models to Predict Urban Traffic in Adverse Weather",
+                "summary": "Urban traffic flow prediction is a cornerstone of intelligent transportation systems, yet accurate forecasting under adverse weather conditions remains a significant challenge. Existing data-driven models, while effective for routine patterns, often struggle with the sparse data and complex non-linear shifts associated with rare meteorological events. These methods typically treat environmental contexts as shallow numerical features, failing to capture the underlying semantic reasoning-why and how specific adverse conditions alter mobility behaviors across regions with different functional compositions. To address this limitation, we propose Multi-STG, a unified framework that integrates Large Language Model (LLM)-derived semantic priors with graph-based spatiotemporal learning. Multi-STG introduces an LLM-empowered semantic enhancement module that transforms comprehensive context descriptions such as weather, POIs, and holidays into high-level semantic embeddings, effectively providing a knowledge-driven complement to data scarcity. Furthermore, we design a multimodal attentional fusion mechanism to dynamically weigh heterogeneous inputs and a semantic-enhanced prediction head with gated residual calibration to robustly adjust forecasts based on semantic guidance. Extensive experiments on real-world multi-city private car datasets demonstrate that Multi-STG outperforms state-of-the-art baselines, reducing MAE by 11.82\\% on average relative to the strongest baseline across three cities, while maintaining stable performance under sparse and non-stationary conditions.",
+                "authors": [
+                  "Zhu Xiao",
+                  "Kuan Feng",
+                  "Tong Li",
+                  "Chenxi Liu",
+                  "Gang Wang",
+                  "Zhuo Tang",
+                  "Kenli Li"
+                ],
+                "published": "2026-11-09T16:12:51Z",
+                "updated": "2026-11-09T16:12:51Z",
+                "url": "http://arxiv.org/abs/2611.12635v1",
+                "pdf_url": "https://arxiv.org/pdf/2611.12635v1",
+                "source": "arxiv.org",
+                "primary_category": "cs.AI",
+                "categories": [
+                  "cs.AI"
+                ]
+              },
+              {
+                "arxiv_id": "2611.12293v1",
+                "title": "Depth as a Candidate Source: Portfolio Allocation for Recurrent Test-Time Scaling in Large Language Models",
+                "summary": "Recurrent latent reasoning in large lanugage models (LLMs) scales test-time computation by increasing recurrent depth, naturally framing inference as a problem of deciding when to stop. We identify a previously overlooked limitation of this single-depth view through systematic preliminary analysis: deeper recurrence can lose correct solutions found at shallower depths, while depth-specific success sets remain broadly non-nested even after controlling for marginal accuracy. This suggests that depth determines not only computation cost, but also access to distinct candidate solutions. Motivated by this finding, we propose Depth Portfolio Allocation (DPA), which reformulates recurrent test-time scaling as budgeted allocation across depth-specific candidate sources. DPA supports both fixed portfolios and feedback-guided sequential allocation under a shared inference budget. Experiments on GSM8K, SVAMP, MultiArith, and MBPP show that mixed-depth portfolios expand oracle coverage under matched candidate counts and nominal costs, while feedback-guided allocation generally matches or improves uniform allocation and can reduce computation in high-budget settings. Code and data are avaible at : https://anonymous.4open.science/r/LLM-latent-B7BC/.",
+                "authors": [
+                  "Chaoyuan Hao",
+                  "Wentao Yue",
+                  "Yanyan Wu",
+                  "Boyuan Gao",
+                  "Tianyou Lai",
+                  "Maolin Wang",
+                  "Yongxin Ni",
+                  "Hanwen Du",
+                  "Youhua Li"
+                ],
+                "published": "2026-11-09T12:17:59Z",
+                "updated": "2026-11-09T12:17:59Z",
+                "url": "http://arxiv.org/abs/2611.12293v1",
+                "pdf_url": "https://arxiv.org/pdf/2611.12293v1",
+                "source": "arxiv.org",
+                "primary_category": "cs.AI",
+                "categories": [
+                  "cs.AI"
+                ]
+              },
+              {
+                "arxiv_id": "2611.12285v1",
+                "title": "Learning Evidence-Grounded Reasoning for Context-Aware Time Series Forecasting",
+                "summary": "LLM-driven time series forecasting has become increasingly promising by leveraging contextual features to generate future values directly or refine forecast priors. However, incorporating contextual features alone does not ensure that models can identify which features matter for forecasting and understand what they suggest about future dynamics. We argue that the fundamental challenge is how to extract predictive evidence from contextual features and when and how to leverage it to guide forecasting decisions. In this paper, we propose CastReasoner, an evidence-grounded reasoning model for context-aware time series forecasting. Specifically, CastReasoner uses a structured chain of thought (CoT) to extract predictive evidence from contextual features, infer the future dynamics suggested by this evidence, and assess these dynamics against the forecast prior to guide adaptive forecasting decisions. To enable this capability, we design a reasoning-centric two-stage post-training framework including supervised fine-tuning (SFT) and reinforcement learning (RL). First, we synthesize reasoning trajectories through controllable multi-teacher guidance and select high-quality ones using a novel student-aware difficulty metric. Second, we design fine-grained multi-objective rewards to further improve reasoning and forecasting. To address heterogeneous learning needs across domains in both stages, we introduce a convergence-guided data balancing strategy. Through this two-stage training, CastReasoner improves both reasoning quality and predictive accuracy. Extensive experiments across multi-domain forecasting benchmarks demonstrate that CastReasoner achieves superior forecasting performance.",
+                "authors": [
+                  "Xingpeng Gao",
+                  "Mingyue Cheng",
+                  "Daoyu Wang",
+                  "Huajian Zhang",
+                  "Xiaoyu Tao"
+                ],
+                "published": "2026-11-09T12:12:18Z",
+                "updated": "2026-11-09T12:12:18Z",
+                "url": "http://arxiv.org/abs/2611.12285v1",
+                "pdf_url": "https://arxiv.org/pdf/2611.12285v1",
+                "source": "arxiv.org",
+                "primary_category": "cs.LG",
+                "categories": [
+                  "cs.LG"
+                ]
+              }
+            ],
+            "rate_limit_note": "arXiv may return 429 if called too frequently; this tool waits at least 3 seconds between requests in-process."
+          }
+        }
+      ]
+    },
+    {
+      "id": "M01G_clarify_then_translate",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_clarify_fill_translate",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: lượt 1 thiếu văn bản, lượt 2 bổ sung văn bản → carry ngôn ngữ đích fr từ lượt 1 + text nguyên văn từ lượt 2."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Dịch đoạn này sang tiếng Pháp giúp mình"
+        },
+        {
+          "role": "user",
+          "content": "Đoạn đây: Please review the attached document."
+        },
+        {
+          "role": "user",
+          "content": "Dịch đúng nguyên văn nhé"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "Please review the attached document.",
+              "target_languages": [
+                "fr"
+              ]
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "Please review the attached document.",
+              "target_languages": [
+                "fr"
+              ]
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "translate",
+          "args": {
+            "text": "Please review the attached document.",
+            "target_languages": [
+              "fr"
+            ]
+          },
+          "result": {
+            "tool": "translate",
+            "backend": "mymemory",
+            "source_language": "en",
+            "target_languages": [
+              "fr"
+            ],
+            "tone": "neutral",
+            "tone_applied": false,
+            "truncated": false,
+            "translations": {
+              "fr": "Veuillez consulter le document ci-joint."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "M02G_correction_target_language",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_translate_correction",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: user sửa ngôn ngữ đích ja → zh, carry text từ lượt 1; không được giữ ja."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Dịch sang tiếng Nhật: The meeting is at 3pm."
+        },
+        {
+          "role": "user",
+          "content": "À nhầm, dịch sang tiếng Trung"
+        },
+        {
+          "role": "user",
+          "content": "Vẫn câu đó nhé"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "The meeting is at 3pm.",
+              "target_languages": [
+                "zh"
+              ]
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "The meeting is at 3pm.",
+              "target_languages": [
+                "zh"
+              ]
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "translate",
+          "args": {
+            "text": "The meeting is at 3pm.",
+            "target_languages": [
+              "zh"
+            ]
+          },
+          "result": {
+            "tool": "translate",
+            "backend": "mymemory",
+            "source_language": "en",
+            "target_languages": [
+              "zh"
+            ],
+            "tone": "neutral",
+            "tone_applied": false,
+            "truncated": false,
+            "translations": {
+              "zh": "会议在下午3点开始。"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "M03G_add_target_language",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_translate_accumulate_targets",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: cộng dồn ngôn ngữ đích vi + th vào MỘT lần gọi, carry text từ lượt 1."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Dịch sang tiếng Việt: Thank you for your help."
+        },
+        {
+          "role": "user",
+          "content": "Thêm cả tiếng Thái nữa"
+        },
+        {
+          "role": "user",
+          "content": "Dịch lại cả tiếng Việt và tiếng Thái trong một lần nhé"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "Thank you for your help.",
+              "target_languages": [
+                "vi",
+                "th"
+              ]
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": false,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "translate",
+            "args": {
+              "text": "Thank you for your help.",
+              "target_languages": [
+                "vi",
+                "th"
+              ]
+            }
+          },
+          {
+            "name": "send",
+            "args": {
+              "text": "Cảm ơn bạn đã giúp đỡ.\nขอบคุณสำหรับความช่วยเหลือ"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": "extra_tool_call",
+        "failure_type": "wrong_arg_value",
+        "failures": [
+          "extra tool call send"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "translate",
+          "args": {
+            "text": "Thank you for your help.",
+            "target_languages": [
+              "vi",
+              "th"
+            ]
+          },
+          "result": {
+            "tool": "translate",
+            "backend": "mymemory",
+            "source_language": "en",
+            "target_languages": [
+              "vi",
+              "th"
+            ],
+            "tone": "neutral",
+            "tone_applied": false,
+            "truncated": false,
+            "translations": {
+              "vi": "Xin cám ơn sự giúp đỡ của các bạn. ",
+              "th": "ขอขอบคุณสำหรับความช่วยเหลือ!"
+            }
+          }
+        },
+        {
+          "tool": "send",
+          "args": {
+            "text": "Cảm ơn bạn đã giúp đỡ.\nขอบคุณสำหรับความช่วยเหลือ"
+          },
+          "result": {
+            "tool": "send_telegram",
+            "status": "needs_confirmation",
+            "message": "Only send after the user explicitly confirms."
+          }
+        }
+      ]
+    },
+    {
+      "id": "M04G_translate_then_send_needs_confirm",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_confirm_before_send_translation",
+        "difficulty": "hard",
+        "what_it_tests": "2 turns: sau khi dịch, user muốn đăng → phải clarify yes_no xin xác nhận, KHÔNG gọi send ngay (translate chỉ dịch, không gửi)."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Dịch sang tiếng Việt: Our new product launches next week."
+        },
+        {
+          "role": "user",
+          "content": "Đăng bản dịch đó lên Telegram luôn giúp mình"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": false,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "send",
+            "args": {
+              "text": "Sản phẩm mới của chúng tôi sẽ ra mắt vào tuần tới.",
+              "confirmed": true
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": "missing_tool_call",
+        "failure_type": "wrong_boundary",
+        "failures": [
+          "missing tool call clarify",
+          "extra tool call send"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "send",
+          "args": {
+            "text": "Sản phẩm mới của chúng tôi sẽ ra mắt vào tuần tới.",
+            "confirmed": true
+          },
+          "result": {
+            "tool": "send_telegram",
+            "error": "RuntimeError",
+            "message": "Missing TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "M05G_parallel_timeline_and_web_news",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_parallel_timeline_lookup",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: map Andrej Karpathy → handle karpathy, resolve 'ông ấy' từ lượt 1; gọi SONG SONG timeline (limit=3) + lookup (topic=news, timeframe=week)."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tweet mới nhất của Andrej Karpathy là gì?"
+        },
+        {
+          "role": "user",
+          "content": "Tìm thêm tin tức trên web về ông ấy trong tuần này nữa"
+        },
+        {
+          "role": "user",
+          "content": "Lấy cả hai cùng lúc nhé: 3 tweet mới nhất và tin web tuần này"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "karpathy",
+              "limit": 3
+            }
+          },
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "week"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": true,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "karpathy",
+              "limit": 3
+            }
+          },
+          {
+            "name": "lookup",
+            "args": {
+              "query": "Andrej Karpathy",
+              "timeframe": "week",
+              "max_results": 5
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "wrong_arg_value",
+        "failure_type": "wrong_tool",
+        "failures": [
+          "topic: expected 'news', got None"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "timeline",
+          "args": {
+            "screenname": "karpathy",
+            "limit": 3
+          },
+          "result": {
+            "tool": "get_user_tweets",
+            "error": "RuntimeError",
+            "message": "Missing RAPIDAPI_KEY env var"
+          }
+        },
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "Andrej Karpathy",
+            "timeframe": "week",
+            "max_results": 5
+          },
+          "result": {
+            "tool": "web_search",
+            "error": "RuntimeError",
+            "message": "Missing TAVILY_API_KEY env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "M06G_read_then_summarize",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_read_then_summarize",
+        "difficulty": "hard",
+        "what_it_tests": "Sau khi đã có ngữ cảnh bài viết từ lượt trước, lượt này yêu cầu tóm tắt thành 2 câu -> route vào tool mới summarize với max_sentences=2."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Đọc nội dung bài viết này giúp mình: https://example.com/ai-agent-2026"
+        },
+        {
+          "role": "assistant",
+          "content": "Bài viết giới thiệu về sự bùng nổ của AI Agent trong năm 2026. Các mô hình Agentic AI hiện nay có khả năng tự động phối hợp nhiều công cụ để giải quyết các bài toán lập trình phức tạp. Tuy nhiên việc kiểm thử độ an toàn và độ tin cậy của các lệnh gọi công cụ vẫn là một thách thức lớn cần giải quyết."
+        },
+        {
+          "role": "user",
+          "content": "Tóm tắt nội dung bài viết trên thành 2 câu ý chính giúp mình"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "summarize",
+            "args": {
+              "max_sentences": 2
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "summarize",
+            "args": {
+              "text": "Bài viết giới thiệu về sự bùng nổ của AI Agent trong năm 2026. Các mô hình Agentic AI hiện nay có khả năng tự động phối hợp nhiều công cụ để giải quyết các bài toán lập trình phức tạp. Tuy nhiên việc kiểm thử độ an toàn và độ tin cậy của các lệnh gọi công cụ vẫn là một thách thức lớn cần giải quyết.",
+              "max_sentences": 2
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "summarize",
+          "args": {
+            "text": "Bài viết giới thiệu về sự bùng nổ của AI Agent trong năm 2026. Các mô hình Agentic AI hiện nay có khả năng tự động phối hợp nhiều công cụ để giải quyết các bài toán lập trình phức tạp. Tuy nhiên việc kiểm thử độ an toàn và độ tin cậy của các lệnh gọi công cụ vẫn là một thách thức lớn cần giải quyết.",
+            "max_sentences": 2
+          },
+          "result": {
+            "tool": "summarize",
+            "summary": "Bài viết giới thiệu về sự bùng nổ của AI Agent trong năm 2026. Các mô hình Agentic AI hiện nay có khả năng tự động phối hợp nhiều công cụ để giải quyết các bài toán lập trình phức tạp.",
+            "key_points": [
+              "Bài viết giới thiệu về sự bùng nổ của AI Agent trong năm 2026.",
+              "Các mô hình Agentic AI hiện nay có khả năng tự động phối hợp nhiều công cụ để giải quyết các bài toán lập trình phức tạp."
+            ],
+            "sentence_count": 2,
+            "original_length": 300
+          }
+        }
+      ]
+    },
+    {
+      "id": "M07G_clarify_then_summarize",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_clarify_then_summarize",
+        "difficulty": "medium",
+        "what_it_tests": "Lượt đầu thiếu text, lượt sau user cung cấp nội dung -> gọi tool mới summarize."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tóm tắt văn bản này giúp mình"
+        },
+        {
+          "role": "assistant",
+          "content": "Bạn hãy cung cấp nội dung đoạn văn bản cần tóm tắt nhé."
+        },
+        {
+          "role": "user",
+          "content": "Đây là nội dung: Trí tuệ nhân tạo đang thay đổi cách phát triển phần mềm. Các lập trình viên sử dụng AI để hỗ trợ kiểm thử và tự động hóa quy trình triển khai."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "summarize",
+            "args": {}
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "summarize",
+            "args": {
+              "text": "Trí tuệ nhân tạo đang thay đổi cách phát triển phần mềm. Các lập trình viên sử dụng AI để hỗ trợ kiểm thử và tự động hóa quy trình triển khai.",
+              "max_sentences": 3
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "summarize",
+          "args": {
+            "text": "Trí tuệ nhân tạo đang thay đổi cách phát triển phần mềm. Các lập trình viên sử dụng AI để hỗ trợ kiểm thử và tự động hóa quy trình triển khai.",
+            "max_sentences": 3
+          },
+          "result": {
+            "tool": "summarize",
+            "summary": "Trí tuệ nhân tạo đang thay đổi cách phát triển phần mềm. Các lập trình viên sử dụng AI để hỗ trợ kiểm thử và tự động hóa quy trình triển khai.",
+            "key_points": [
+              "Trí tuệ nhân tạo đang thay đổi cách phát triển phần mềm.",
+              "Các lập trình viên sử dụng AI để hỗ trợ kiểm thử và tự động hóa quy trình triển khai."
+            ],
+            "sentence_count": 2,
+            "original_length": 142
+          }
+        }
+      ]
+    },
+    {
+      "id": "M08G_confirm_before_send",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_confirm_send",
+        "difficulty": "hard",
+        "what_it_tests": "Lượt trước trợ lý xin xác nhận đăng tin, lượt này người dùng đồng ý -> gọi send với confirmed=true."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Đăng bản tóm tắt nghiên cứu này lên kênh Telegram nhóm nhé"
+        },
+        {
+          "role": "assistant",
+          "content": "Nội dung tóm tắt: 'Nghiên cứu về Agentic AI đã hoàn tất'. Bạn có xác nhận muốn đăng bài này lên kênh Telegram không?"
+        },
+        {
+          "role": "user",
+          "content": "Đồng ý, hãy đăng ngay bây giờ"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "send",
+            "args": {
+              "confirmed": true
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": true,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "send",
+            "args": {
+              "text": "Nghiên cứu về Agentic AI đã hoàn tất"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": "wrong_arg_value",
+        "failure_type": "wrong_boundary",
+        "failures": [
+          "confirmed: expected True, got None"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "send",
+          "args": {
+            "text": "Nghiên cứu về Agentic AI đã hoàn tất"
+          },
+          "result": {
+            "tool": "send_telegram",
+            "status": "needs_confirmation",
+            "message": "Only send after the user explicitly confirms."
+          }
+        }
+      ]
+    }
+  ]
+}
