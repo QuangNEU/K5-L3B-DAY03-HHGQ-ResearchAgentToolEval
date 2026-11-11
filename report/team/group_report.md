@@ -101,11 +101,15 @@ Liệt kê đúng 10 case trong `starter_v0/data/eval_group.json` (5 single turn
 
 ### B4. Live Chat Evidence
 
-Lấy từ `starter_v0/transcripts/*.transcript.json`.
+Nguồn: [transcript v5_openrouter_20261111T110806254734](../../starter_v0/transcripts/v5_openrouter_20261111T110806254734.transcript.json). Model: `nvidia/nemotron-3.5-lightning:free`; artifact version: `v5+p8c3bd325c59a+t31cff782e456`.
 
-| Turn | User Request | Tool Calls | Version Evidence | Outcome |
+| Turn | User Request (nguyên văn) | Tool Calls (theo thứ tự) | Version Evidence | Outcome |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| 1 | Dịch giúp mình: The new model outperforms GPT-4 on reasoning tasks. | `translate(text="The new model outperforms GPT-4 on reasoning tasks.", target_languages=["vi"], tone="neutral")` | v5+p8c3bd325c59a+t31cff782e456 | Đúng: “Mô hình mới vượt trội hơn GPT-4 trong các nhiệm vụ suy luận.” |
+| 2 | Dịch sang tiếng Nhật và tiếng Hàn: Good morning, team. | `translate(text="Good morning, team.", target_languages=["ja", "ko"], tone="neutral")` | v5+p8c3bd325c59a+t31cff782e456 | Đúng: trả đủ bản dịch tiếng Nhật và tiếng Hàn. |
+| 3 | Dịch bài này hộ mình | `clarify(response_type="text", question="Bạn muốn dịch đoạn văn bản nào? Vui lòng cung cấp nội dung hoặc liên kết bài viết bạn muốn dịch.")` | v5+p8c3bd325c59a+t31cff782e456 | Đúng: hỏi lại nội dung hoặc liên kết bài viết trước khi dịch. |
+| 4 | Tóm tắt rồi dịch sang tiếng Việt: https://openai.com/research/ | `fetch(url="https://openai.com/research/")` → `summarize(text=<nội dung trang>, focus="general", max_sentences=5)` → `translate(text=<kết quả summarize>, target_languages=["vi"])` | v5+p8c3bd325c59a+t31cff782e456 | Một phần: gọi đủ chuỗi tool, nhưng kết quả tóm tắt chủ yếu gồm tiêu đề và link; bản dịch không bao gồm đầy đủ nội dung tóm tắt tiếng Anh. |
+| 5 | Tweet mới nhất của Sam Altman, dịch sang tiếng Việt | `timeline(limit=1, screenname="sama")` → `translate(text=<nội dung tweet trả về>, target_languages=["vi"], tone="neutral")` | v5+p8c3bd325c59a+t31cff782e456 | Một phần: trả bản dịch và link tweet, nhưng nội dung nguồn đã bị cắt ngắn nên bản dịch chưa đầy đủ. |
 
 ### B5a. Required Evidence — Tool mới, unit test, UI
 
