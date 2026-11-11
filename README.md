@@ -88,10 +88,10 @@ Tool có sẵn (`send`, `policy`, `papers`, `paper_text`) không tự được b
 - [x] `pytest`: 0 failed; 3 test của tool mới không còn `skipped` (stub của tool có sẵn được phép còn skip)
 
 **Demo & báo cáo (CP5)**
-- [ ] UI chạy được + link dùng thử
-- [ ] `chat.py`: ≥ 3 lượt live, có transcript
-- [ ] `report/team/group_report.md` Phần A trước 16:30, Phần B trước khi nộp
-- [ ] Mỗi thành viên có `report/team/MSSV_HoTen.md`
+- [x] UI chạy được + link dùng thử
+- [x] `chat.py`: ≥ 3 lượt live, có transcript
+- [x] `report/team/group_report.md` Phần A trước 16:30, Phần B trước khi nộp
+- [x] Mỗi thành viên có `report/team/MSSV_HoTen.md`
 
 **Bonus (tuỳ chọn)**
 - [ ] `send` gửi thật lên Telegram sau khi user xác nhận, có transcript chứng minh
