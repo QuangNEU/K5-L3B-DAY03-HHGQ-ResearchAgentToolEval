@@ -1,4 +1,4 @@
-# Báo cáo cá nhân — Vương Trường Giang — 2A202603834
+# Báo cáo cá nhân — VuongTruongGiang-2A202603834
 
 ## 1. Thông tin thành viên
 
