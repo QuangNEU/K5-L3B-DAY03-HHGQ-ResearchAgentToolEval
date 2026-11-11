@@ -30,7 +30,7 @@ Dependency đã thêm vào requirements.txt: streamlit>=1.30.0
 
 > Dán link public để team khác mở thử ngay. Cách deploy nhanh bằng Cloudflare Tunnel xem README. Nếu deploy Vercel/Streamlit Cloud thì dán link đó.
 >
-> URL:
+> URL: https://k5-l3b-day03-hhgq-researchagenttooleval-asgdbfdxyepihpbjlicpev.streamlit.app/
 
 ### A2. Tool agent có
 
