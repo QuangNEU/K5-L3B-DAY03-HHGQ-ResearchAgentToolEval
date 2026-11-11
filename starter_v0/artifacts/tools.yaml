@@ -16,7 +16,7 @@
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
-    description: "Gửi một câu hỏi cho người dùng."
+    description: "Đặt câu hỏi và chờ người dùng trả lời. Dùng khi cần người dùng bổ sung thông tin, chọn một phương án hoặc xác nhận một hành động trước khi tiếp tục. Nếu thông tin cần thiết đã có trong hội thoại, dùng thông tin đó để làm tiếp."
     parameters:
       type: object
       properties:
@@ -26,16 +26,16 @@ tools:
       required: [question]
 
   - name: timeline
-    description: "Lấy các bài đăng gần đây."
+    description: "Lấy các bài đăng gần đây của một tài khoản X (Twitter) cụ thể. Dùng khi người dùng muốn xem chính tài khoản đó đã đăng gì."
     parameters:
       type: object
       properties:
-        screenname: {type: string, default: "", description: "Tên tài khoản"}
+        screenname: {type: string, default: "", description: "Tên người dùng trên X (Twitter), viết liền và bỏ dấu @ ở đầu. Ví dụ: nếu tài khoản là @abc_xyz thì điền abc_xyz. Nếu chỉ biết họ tên, hãy hỏi lại tên người dùng."}
         limit: {type: integer, default: 5, description: "Số lượng"}
       required: [screenname]
 
   - name: social_search
-    description: "Tìm trên mạng xã hội."
+    description: "Tìm các bài đăng trên X (Twitter) theo từ khóa hoặc chủ đề, bất kể tài khoản nào đăng. Nếu người dùng muốn xem bài do một tài khoản cụ thể đăng, dùng timeline."
     parameters:
       type: object
       properties:
@@ -45,12 +45,12 @@ tools:
       required: [query]
 
   - name: lookup
-    description: "Tra cứu thông tin trên internet."
+    description: "Tìm nguồn trên web theo chủ đề hoặc câu hỏi, gồm cả tra cứu thông tin và tìm tin tức."
     parameters:
       type: object
       properties:
-        query: {type: string, default: "", description: "Truy vấn"}
-        topic: {type: string, enum: [general, news], default: "general", description: "Phân loại"}
+        query: {type: string, default: "", description: "Chủ đề hoặc thực thể cần tìm, ngắn gọn. Không thêm từ chỉ loại nội dung hoặc thời gian như 'tin tức', 'news', 'hôm nay', 'today'; dùng topic và timeframe cho các thông tin đó. Ví dụ: tin AI hôm nay → 'AI'; tin robotics hôm nay → 'robotics'."}
+        topic: {type: string, enum: [general, news], default: "general", description: "Kiểu tìm kiếm trên web. Chọn news để tìm tin tức về một chủ đề, hoặc general để tra cứu thông tin chung về chủ đề đó."}
         timeframe: {type: string, enum: [day, week, month, year], default: "week", description: "Khoảng thời gian"}
         max_results: {type: integer, default: 5, description: "Số kết quả"}
       required: [query]
