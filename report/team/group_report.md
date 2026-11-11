@@ -227,7 +227,7 @@ Lỗi đặc thù của model nhỏ (đếm từ run JSON):
   - Azure, Google và DeepL đều cần nhập thẻ hoặc thiếu ngôn ngữ (DeepL không có Lào, Khmer). Nhóm chọn MyMemory vì không cần key.
   - Đổi lại, MyMemory giới hạn khoảng 500 byte mỗi request, nên code cắt văn bản thành đoạn ≤ 450 byte.
   - MyMemory không hỗ trợ văn phong, nên tham số `tone` được nhận nhưng không áp dụng (output ghi `tone_applied: false`).
-- **Model free bị 429:** `google/gemma-4-31b-it:free` và `gemma-4-26b-a4b-it:free` liên tục trả 429 do nhà cung cấp quá tải. Nhóm chuyển sang `nvidia/nemotron-3.5-super-vl:free` khi chat thử, và dùng `openai/gpt-4o-mini` cho run eval.
+- **Model `nvidia/nemotron-3.5-lightning:free`** bị giới hạn 50 lượt gọi API. Mỗi lần chạy eval tiêu tốn nhiều lượt gọi, nên nhóm thường hết hạn mức sau khoảng 2–3 lần chạy và nhận mã lỗi 429. Để tiếp tục thử nghiệm, nhóm đã sử dụng nhiều tài khoản để tạo thêm API key." 
 - **Viết eval case cho đúng cách chấm:** `run_eval.py` chỉ chấm lần gọi model đầu tiên, so khớp tham số chính xác, và tính fail khi gọi thừa tool.
   - Vì vậy case dùng nhiều tool phải kiểm tra **gọi song song**, không kiểm tra chuỗi tuần tự.
   - Mỗi case chỉ kiểm tra tham số cần thiết. Ví dụ G01 không kiểm tra `target_languages`, vì bỏ trống là hợp lệ.
