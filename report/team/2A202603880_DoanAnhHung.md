@@ -4,7 +4,7 @@
 
 - Họ tên: Đoàn Anh Hùng
 - MSSV: 2A202603880
-- Email: hungdoan772@gmail.com
+- Email: 26ai.hungda@vinuni.edu.vn
 - GitHub: doananhhung
 - Nhánh làm việc (Branch): `doananhhung`
 
