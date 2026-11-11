@@ -36,23 +36,57 @@ Ví dụ: "Research agent: tìm tin theo từ khóa / theo tài khoản, đọc 
 
 | Tên tool | Làm được gì | Tool mới nhóm thêm? |
 |---|---|---|
-| clarify | hỏi lại người dùng khi thiếu thông tin | không |
-|  |  |  |
-|  |  |  |
+| clarify | hỏi lại người dùng khi thiếu thông tin hoặc cần xác nhận (`response_type`: text / yes_no / choice), tạm dừng chờ lượt trả lời tiếp theo | không |
+| timeline | lấy các tweet gần đây của **một tài khoản** X/Twitter (`screenname` là handle không có `@`) qua RapidAPI Twitter API45 | không |
+| social_search | tìm tweet theo **từ khoá / chủ đề**, sắp xếp `Latest` hoặc `Top`, qua RapidAPI Twitter API45 | không |
+| lookup | tìm kiếm web qua Tavily, có `topic` (`general` / `news`) và `timeframe` (day / week / month / year) | không |
+| fetch | đọc nội dung của **một URL cụ thể** qua Firecrawl | không |
+| format | trình bày các item đã thu thập thành bản tin markdown (template brief / sections / bullets / thread / daily_ai_vn), không tự lấy dữ liệu | không |
+| send | đăng văn bản lên kênh Telegram; chỉ gửi khi `confirmed=true` (cần user xác nhận trước) | không (bonus có sẵn) |
+| policy | tra cứu tài liệu chính sách nội bộ trong `company_policy/*.md`, trả về đoạn liên quan kèm nguồn | không (bonus có sẵn) |
+| papers | tìm bài báo khoa học trên arXiv (sắp xếp theo relevance / ngày cập nhật / ngày nộp) | không (bonus có sẵn) |
+| paper_text | tải PDF bài arXiv và trích nội dung text (giới hạn số trang, số ký tự) | không (bonus có sẵn) |
+| translate | dịch văn bản tiếng Anh sang một hoặc nhiều ngôn ngữ (vi, zh, ja, ko, fr, de, es, ru, th, lo, km, id) trong một lần gọi; không nói ngôn ngữ thì mặc định tiếng Việt | **có** |
+| summarize | tóm tắt văn bản thô bằng cách trích các câu ý chính (extractive), chạy local, không cần API | **có** |
 
 ### A3. Câu hỏi mẫu để thử
 
 > 3–5 câu hỏi/yêu cầu mẫu để team khác tự thử agent ngay.
 
-1.
-2.
-3.
+1. `Dịch sang tiếng Nhật và tiếng Hàn: Good morning, team.` → `translate` với `target_languages=["ja","ko"]` trong một lần gọi
+2. `Dịch giúp mình: The new model outperforms GPT-4 on reasoning tasks.` → `translate`, tự dịch sang tiếng Việt
+3. `Tóm tắt thành 2 câu: <dán đoạn văn bản>` → `summarize` với `max_sentences=2`
+4. `Dịch bài này hộ mình` (không kèm nội dung) → agent gọi `clarify` để xin văn bản
 
 ## 3. Giải pháp
 
 > Tóm tắt các thay đổi chính trong `starter_v0/artifacts/system_prompt.md` và `starter_v0/artifacts/tools.yaml`, và tool mới nhóm viết (tên, làm gì, khi nào agent nên gọi).
 
--
+**Tool mới nhóm viết.** Mỗi tool có `tools/<tên>/tool.py` và `TOOL.md`, đăng ký trong `tools/__init__.py` (`TOOL_FUNCTIONS`) và `artifacts/tools.yaml`.
+
+- **`translate`** — `starter_v0/tools/translate/`
+  - **Làm gì:** dịch văn bản tiếng Anh sang một hoặc nhiều ngôn ngữ qua MyMemory API. Không cần key; biến tuỳ chọn `MYMEMORY_EMAIL` tăng hạn mức free.
+  - **Tham số:**
+    - `text` (bắt buộc): nguyên văn, không chèn câu lệnh của user.
+    - `target_languages`: enum 12 mã ISO 639-1, mặc định `["vi"]`.
+    - `tone`: `neutral` / `formal` / `casual`.
+  - **Khi nào agent gọi:** user yêu cầu rõ việc dịch một đoạn tiếng Anh đã có. Nhiều ngôn ngữ thì gom vào **một** lần gọi.
+  - **Khi nào không gọi:**
+    - Hỏi nghĩa một từ: trả lời thẳng.
+    - Chưa có văn bản: gọi `clarify`.
+    - Văn bản nằm ở URL: gọi `fetch` trước.
+    - Muốn đăng bản dịch: qua `send` và xin xác nhận.
+  - **Chịu lỗi:**
+    - Tự chuẩn hoá tham số sai: chữ hoa, trùng lặp, `en`, mã lạ, chuỗi đơn.
+    - Cắt văn bản thành đoạn ≤ 450 byte theo giới hạn của MyMemory.
+    - Lỗi ở một ngôn ngữ không làm hỏng các ngôn ngữ khác.
+    - Phát hiện hết hạn mức qua `responseStatus`, vì MyMemory vẫn trả HTTP 200.
+- **`summarize`** — `starter_v0/tools/summarize/`
+  - **Làm gì:** tóm tắt extractive, chạy local, không cần API. Câu được chấm điểm theo tần suất từ, cộng thêm điểm cho câu đứng đầu và câu chứa từ khoá `focus`. Kết quả giữ đúng thứ tự câu gốc.
+  - **Tham số:** `text` (bắt buộc), `max_sentences` (mặc định 3), `focus` (mặc định `general`).
+  - **Khi nào agent gọi:** user yêu cầu tóm tắt một văn bản đã có, do user dán vào hoặc lấy từ lượt trước.
+  - **Chịu lỗi:** text rỗng trả kết quả rỗng; `max_sentences ≤ 0` trả dict lỗi.
+- Hai tool kết hợp được với tool có sẵn thành chuỗi `fetch` → `summarize` → `translate`, để đọc bài tiếng Anh rồi tóm tắt và dịch.
 
 ## 4. Kết quả — PHẦN B: Chi tiết và bằng chứng
 
@@ -97,7 +131,23 @@ Liệt kê đúng 10 case trong `starter_v0/data/eval_group.json` (5 single turn
 
 | Case ID | What It Tests | Expected Tool/Behavior | Result |
 |---|---|---|---|
-|  |  |  |  |
+| G01_translate_default_vi | Dịch không nói ngôn ngữ → dịch luôn, mặc định tiếng Việt, không hỏi lại | `translate(text=nguyên văn)` | PASS |
+| G02_translate_multi_language_one_call | Nhiều ngôn ngữ → một lần gọi, đổi tên sang mã ISO | `translate(target_languages=[ja, ko])` | PASS |
+| G03_papers_latest_sort_and_limit | "3 paper mới nộp gần đây nhất" → đúng tool và tham số | `papers(max_results=3, sort_by=submittedDate)` | PASS |
+| G04_word_meaning_no_tool | Hỏi nghĩa một từ → trả lời thẳng | không gọi tool | PASS |
+| G05_parallel_translate_and_papers | Hai yêu cầu độc lập → gọi song song hai tool | `translate([ko])` + `papers(max_results=3)` | PASS |
+| G06_missing_text_clarify | Yêu cầu tóm tắt nhưng không có văn bản → hỏi lại | `clarify(response_type=text)` | FAIL |
+| G07_arxiv_search_sort | Paper arXiv "xếp theo ngày nộp" | `papers(query="LLM reasoning", sort_by=submittedDate)` | PASS |
+| M01G_clarify_then_translate | Lượt 1 có ngôn ngữ, lượt 2 có văn bản → ghép lại | `translate(text, [fr])` | PASS |
+| M02G_correction_target_language | User sửa ngôn ngữ đích ja → zh | `translate(text, [zh])` | PASS |
+| M03G_add_target_language | Cộng dồn ngôn ngữ vi + th vào một lần gọi | `translate(text, [vi, th])` | FAIL |
+| M04G_translate_then_send_needs_confirm | Dịch xong muốn đăng → xin xác nhận trước | `clarify(response_type=yes_no)` | FAIL |
+| M05G_parallel_timeline_and_web_news | Hiểu "ông ấy" là Karpathy, gọi song song hai tool | `timeline(karpathy, 3)` + `lookup(news, week)` | FAIL |
+| M06G_read_then_summarize | Đã có nội dung bài ở lượt trước → tóm tắt thành 2 câu | `summarize(max_sentences=2)` | PASS |
+| M07G_clarify_then_summarize | Lượt đầu thiếu văn bản, lượt sau bổ sung → tóm tắt | `summarize` | PASS |
+| M08G_confirm_before_send | User đã đồng ý ở lượt trước → được gửi | `send(confirmed=true)` | PASS |
+
+Kết quả từ `starter_v0/runs/v0_B_base_openrouter_20261110T185844884854.json`: 11/15 pass, `case_accuracy` 0.7333, `tool_routing_accuracy` 0.8667, `argument_accuracy` 0.7333, `multiturn_accuracy` 0.625, `provider_error_cases` 0.
 
 ### B4. Live Chat Evidence
 
@@ -105,17 +155,30 @@ Lấy từ `starter_v0/transcripts/*.transcript.json`.
 
 | Turn | User Request | Tool Calls | Version Evidence | Outcome |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| 1 | Dịch giúp mình: The new model outperforms GPT-4 on reasoning tasks. | `translate(text=…, target_languages=["vi"])` | `v0+peb1c8179815b+ta62f73730eab` | Đúng: "Mô hình mới vượt trội hơn GPT-4 trong các nhiệm vụ suy luận." |
+| 2 | Dịch sang tiếng Nhật và tiếng Hàn: Good morning, team. | `translate(target_languages=["ja","ko"])`, một lần gọi | như trên | Đúng: trả đủ bản tiếng Nhật và tiếng Hàn |
+| 3 | Dịch bài này hộ mình | `clarify(response_type="text")` | như trên | Đúng: hỏi lại xin nội dung hoặc URL, không dịch bừa |
+| 4 | Tóm tắt rồi dịch sang tiếng Việt: https://openai.com/research/ | `fetch(url=…)` | như trên | Một phần: chỉ gọi `fetch`, model tự tóm tắt và dịch trong câu trả lời, không gọi `summarize` hay `translate` |
+| 5 | Tweet mới nhất của Sam Altman, dịch sang tiếng Việt | `timeline(sama, 1)` | như trên | Một phần: lấy đúng tweet nhưng tự dịch, không gọi `translate` |
+
+Nguồn: `starter_v0/transcripts/v0_openrouter_20261110T182949813877.transcript.json` (model `nvidia/nemotron-3.5-super-vl:free`). Lượt 4 và 5 cho thấy prompt v0 ("Always finish the request in a single step") làm agent bỏ qua bước thứ hai của chuỗi tool.
 
 ### B5a. Required Evidence — Tool mới, unit test, UI
 
 | Item | Evidence File | What Worked | Risk / Guardrail |
 |---|---|---|---|
-| Tool mới (`tools/<tên>/`) |  |  |  |
-| Unit test tool mới (≥ 3 test/tool) | `pytest` output (0 failed) |  |  |
+| Tool mới (`tools/<tên>/`) | `tools/translate/`, `tools/summarize/`; khai báo trong `artifacts/tools.yaml`, đăng ký trong `tools/__init__.py` | `translate` gọi API thật dịch đúng sang vi/ja/ko/zh; `summarize` chạy local. Cả hai pass `tests/test_tool_contract.py` (có hàm, tham số khớp chữ ký, có `TOOL.md`) | `translate` không có side effect và chỉ dịch, muốn đăng phải qua `send` + xác nhận. Giới hạn 5.000 ký tự/lần để giữ hạn mức free. Mọi lỗi trả dict lỗi, không raise |
+| Unit test tool mới (≥ 3 test/tool) | `pytest` output (0 failed) | `starter_v0/tests/test_tools_todo.py`: 8 test `translate` + 3 test `summarize`. `pytest`: 83 passed, 0 failed (14 skipped là stub của tool có sẵn) | Test chạy offline: HTTP giả lập bằng `fake_http`, `conftest.py` chặn mạng thật |
 | UI (lệnh chạy + link dùng thử) |  |  |  |
 
 Tool unit tests: số test đã viết, và một ví dụ lỗi mà unit test bắt được nhưng eval không bắt được.
+
+- **Số test:** 11 test cho tool mới (8 `translate`, 3 `summarize`).
+- **Lỗi unit test bắt được mà eval không bắt được:** khi hết hạn mức, MyMemory vẫn trả **HTTP 200** và chỉ ghi lỗi trong body (`responseStatus: 429`).
+  - Nếu code chỉ kiểm tra HTTP status, tool sẽ trả câu cảnh báo "MYMEMORY WARNING…" như thể đó là bản dịch.
+  - Eval không phát hiện được, vì eval chỉ chấm tool nào được gọi và tham số gì, không chấm kết quả tool trả về.
+  - `test_translate_mymemory_quota_exceeded_returns_error_dict` kiểm tra đúng trường hợp này.
+- **Lỗi thứ hai cùng loại:** model truyền `target_languages=["JA","ja","en","xx"]`. `test_translate_normalizes_bad_target_languages_from_model` xác nhận tool chuẩn hoá thành `["ja"]` thay vì gửi request lỗi.
 
 ### B5. Bonus Evidence
 
@@ -160,7 +223,17 @@ Lỗi đặc thù của model nhỏ (đếm từ run JSON):
 
 > Khó khăn chính và cách nhóm xử lý. Nếu gặp lỗi kỹ thuật (provider lỗi, hết quota API, tool không chạy), mô tả lỗi và dẫn bằng chứng: run JSON, log, ảnh chụp.
 
--
+- **Chọn backend cho `translate`:**
+  - Azure, Google và DeepL đều cần nhập thẻ hoặc thiếu ngôn ngữ (DeepL không có Lào, Khmer). Nhóm chọn MyMemory vì không cần key.
+  - Đổi lại, MyMemory giới hạn khoảng 500 byte mỗi request, nên code cắt văn bản thành đoạn ≤ 450 byte.
+  - MyMemory không hỗ trợ văn phong, nên tham số `tone` được nhận nhưng không áp dụng (output ghi `tone_applied: false`).
+- **Model free bị 429:** `google/gemma-4-31b-it:free` và `gemma-4-26b-a4b-it:free` liên tục trả 429 do nhà cung cấp quá tải. Nhóm chuyển sang `nvidia/nemotron-3.5-super-vl:free` khi chat thử, và dùng `openai/gpt-4o-mini` cho run eval.
+- **Viết eval case cho đúng cách chấm:** `run_eval.py` chỉ chấm lần gọi model đầu tiên, so khớp tham số chính xác, và tính fail khi gọi thừa tool.
+  - Vì vậy case dùng nhiều tool phải kiểm tra **gọi song song**, không kiểm tra chuỗi tuần tự.
+  - Mỗi case chỉ kiểm tra tham số cần thiết. Ví dụ G01 không kiểm tra `target_languages`, vì bỏ trống là hợp lệ.
+- **Merge hai nhánh:** hai thành viên cùng sửa `tools.yaml`, `tools/__init__.py`, `tests/test_tools_todo.py` và `data/eval_group.json`, gây conflict.
+  - Cách gộp: giữ khai báo, đăng ký và test của cả hai tool; gộp danh sách case.
+  - Kiểm tra sau khi gộp: `pytest` vẫn 0 failed (commit `621dcd0`).
 
 ## 6. Tổng hợp đóng góp
 
@@ -168,10 +241,22 @@ Chi tiết đóng góp của từng thành viên nằm trong [TEAM.md](../../TEA
 
 ## 7. Hạn chế và hướng cải thiện — B6. Reflection
 
-- Fix nào thuộc `system_prompt.md`?
-- Fix nào thuộc `tools.yaml`?
-- Failure nào cần review thủ công thay vì chấm tự động?
-- Nếu có thêm một vòng, nhóm sẽ thử giả thuyết nào?
+- **Fix nào thuộc `system_prompt.md`?**
+  - M04G (tự gửi Telegram) đến từ câu "just go ahead and do it".
+  - Transcript lượt 4–5 (bỏ qua bước `summarize`/`translate`) đến từ câu "Always finish the request in a single step".
+  - Cả hai là lỗi hành vi chung, không riêng tool nào, nên sửa ở prompt.
+- **Fix nào thuộc `tools.yaml`?**
+  - G06: thiếu `response_type` của `clarify`.
+  - M05G: thiếu `topic=news` của `lookup`.
+  - M03G: gọi `translate` lặp lại.
+  - Đây là lỗi quy ước tham số và cách dùng từng tool, nên sửa ở description và tham số.
+- **Failure nào cần review thủ công thay vì chấm tự động?**
+  - Transcript lượt 4–5: agent không gọi `translate` nhưng vẫn trả bản dịch tiếng Việt hợp lý. Eval sẽ tính là sai tool, nhưng phải đọc mới biết chất lượng bản dịch có chấp nhận được không.
+  - M03G: lần gọi đầu đã đúng, chỉ thừa lần gọi thứ hai.
+  - Chất lượng bản dịch của `translate` và độ hợp lý của câu `summarize` chọn ra không được eval chấm.
+- **Nếu có thêm một vòng, nhóm sẽ thử giả thuyết nào?**
+  - Giả thuyết: description của `summarize` ("Dùng khi người dùng yêu cầu tóm tắt…") có thể **giành route** của các case base R04 ("Tóm tắt bài này: <URL>", đúng là `fetch`) và R11 ("Tóm tắt bài viết này", đúng là `clarify`).
+  - Cách thử: thêm vào `summarize` dòng "KHÔNG DÙNG KHI: chỉ có URL → `fetch` trước; chưa có văn bản → `clarify`", rồi chạy lại base eval so sánh hai case này.
 
 ## 8. Tài liệu tham khảo
 
